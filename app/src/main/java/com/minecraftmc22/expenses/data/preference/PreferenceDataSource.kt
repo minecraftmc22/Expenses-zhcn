@@ -7,7 +7,6 @@ import com.minecraftmc22.expenses.common.presentation.BackgroundSettings
 import com.minecraftmc22.expenses.common.presentation.Language
 import com.minecraftmc22.expenses.common.presentation.Theme
 import com.minecraftmc22.expenses.common.presentation.ThemeColor
-import com.minecraftmc22.expenses.common.presentation.Theme
 import com.minecraftmc22.expenses.data.model.Currency
 import com.minecraftmc22.expenses.home.presentation.DateRange
 
