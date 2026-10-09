@@ -91,7 +91,7 @@ class SyncManager(
 
         return Single.fromCallable { client.upload(document) }
             .flatMapCompletable { applyChanges(toDownload, toUpdate, localTags) }
-            .andReturn(SyncSummary(toDownload.size, toUpdate.size, merged.size))
+            .toSingleDefault(SyncSummary(toDownload.size, toUpdate.size, merged.size))
     }
 
     private fun applyChanges(

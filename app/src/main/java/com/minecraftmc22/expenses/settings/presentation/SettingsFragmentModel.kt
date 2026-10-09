@@ -15,6 +15,7 @@ import com.minecraftmc22.expenses.common.presentation.Theme
 import com.minecraftmc22.expenses.data.model.Currency
 import com.minecraftmc22.expenses.data.preference.PreferenceDataSource
 import com.minecraftmc22.expenses.data.webdav.SyncSummary
+import com.minecraftmc22.expenses.util.extensions.plusAssign
 import com.minecraftmc22.expenses.util.reactive.DataEvent
 import com.minecraftmc22.expenses.util.reactive.Event
 import com.minecraftmc22.expenses.util.reactive.Variable
