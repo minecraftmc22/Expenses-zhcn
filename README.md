@@ -8,15 +8,15 @@
 
 # Download
 
-App is currently available on the [Google Play](https://play.google.com/store/apps/details?id=com.nominalista.expenses), but you can also download newest APK from [releases page](https://github.com/nominalista/expenses/releases).
+App is currently available on the [Google Play](https://play.google.com/store/apps/details?id=com.nominalista.expenses), but you can also download newest APK from [releases page](https://github.com/minecraftmc22/expenses-zhcn/releases).
 
 # Contact
 
-Expenses is developed and maintained by [nominalista](https://github.com/nominalista). Feel free to reach out to [the.nominalista@gmail.com](mailto://the.nominalista@gmail.com).
+Expenses is developed and maintained by [nominalista](https://github.com/nominalista)&[Minecraftmc22](https://github.com/minecraftmc22) Feel free to reach out to [i.am.minecraftmc22@gmail.com](mailto://i.am.minecraftmc22@gmail.com).
 
 # Copyright
 
-    Copyright 2019 Nominalista. All rights reserved.
+    Copyright 2019 Mc22's Studio. All rights reserved.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
