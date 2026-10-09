@@ -65,6 +65,7 @@ jobs:
           else
             cp app/google-services.json.ci app/google-services.json
             echo "GOOGLE_SERVICES_JSON is not set - using the bundled placeholder config."
+            echo "::warning::GOOGLE_SERVICES_JSON is not set, so this build uses the placeholder Firebase config. Google sign-in WILL fail with error 10 in the resulting APK."
           fi
 
       - name: Build release and debug APKs
@@ -106,6 +107,11 @@ jobs:
             echo "Check that all four signing secrets are non-empty and that RELEASE_KEYSTORE_BASE64"
             echo "really is the Base64 of a .jks file."
             exit 1
+          fi
+          if grep -qa "PLACEHOLDER-NOT-A-REAL-WEB-CLIENT-ID" app/build/outputs/apk/prod/release/*.apk 2>/dev/null; then
+            echo "::warning::The produced APK contains the placeholder Firebase config, so Google sign-in will fail with error 10. Set the GOOGLE_SERVICES_JSON secret and re-run."
+          else
+            echo "The produced APK carries a real Firebase config (no placeholder strings found)."
           fi
 
       - name: Upload APKs
