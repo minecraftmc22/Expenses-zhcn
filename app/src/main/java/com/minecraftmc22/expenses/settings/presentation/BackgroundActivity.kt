@@ -47,7 +47,7 @@ class BackgroundActivity : BaseActivity() {
         setupActionBar()
         setupListeners()
 
-        settings = application.preferenceDataSource.getBackground(this)
+        settings = app.preferenceDataSource.getBackground(this)
 
         bindSettings()
         updatePreview()
@@ -145,7 +145,7 @@ class BackgroundActivity : BaseActivity() {
     }
 
     private fun persistAndPreview() {
-        application.preferenceDataSource.setBackground(this, settings)
+        app.preferenceDataSource.setBackground(this, settings)
         updatePreview()
     }
 

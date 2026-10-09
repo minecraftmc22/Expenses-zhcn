@@ -7,6 +7,7 @@ import com.minecraftmc22.expenses.data.model.Tag
 import com.minecraftmc22.expenses.data.store.DataStore
 import io.reactivex.Completable
 import io.reactivex.Single
+import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers.io
 
 /** What one sync did, shown to the user afterwards. */
@@ -33,18 +34,25 @@ class SyncManager(
 ) {
 
     fun sync(): Single<SyncSummary> {
-        return dataStore.getExpenses()
-            .zipWith(dataStore.getTags()) { expenses, tags -> expenses to tags }
-            .flatMap { (localExpenses, localTags) ->
-                Single.fromCallable { client.download() }
+        return Single.zip(
+            dataStore.getExpenses(),
+            dataStore.getTags(),
+            BiFunction<List<Expense>, List<Tag>, Pair<List<Expense>, List<Tag>>> { expenses, tags ->
+                Pair(expenses, tags)
+            }
+        )
+            .flatMap { local: Pair<List<Expense>, List<Tag>> ->
+                // An empty document is a valid answer: the server has no file yet. It has to be
+                // a string, because a Single must never emit null.
+                Single.fromCallable { client.download().orEmpty() }
                     .map { document ->
-                        if (document.isNullOrBlank()) {
+                        if (document.isBlank()) {
                             BackupContent(emptyList(), emptyList())
                         } else {
                             backupManager.read(document)
                         }
                     }
-                    .flatMap { remote -> merge(localExpenses, localTags, remote) }
+                    .flatMap { remote -> merge(local.first, local.second, remote) }
             }
             .subscribeOn(io())
     }

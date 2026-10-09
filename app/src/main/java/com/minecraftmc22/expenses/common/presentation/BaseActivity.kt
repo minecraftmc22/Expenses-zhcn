@@ -13,9 +13,9 @@ import android.view.Gravity
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.navigation.findNavController
+import com.minecraftmc22.expenses.Application
 import com.minecraftmc22.expenses.R
 import com.minecraftmc22.expenses.util.BackgroundRenderer
-import com.minecraftmc22.expenses.util.extensions.application
 import com.minecraftmc22.expenses.util.extensions.withSelectedLanguage
 
 @SuppressLint("Registered")
@@ -31,6 +31,13 @@ open class BaseActivity : AppCompatActivity() {
 
     /** Picture owned by the current screen, null to use the one from settings. */
     private var screenBackgroundPath: String? = null
+
+    /**
+     * Inside an Activity the name `application` resolves to Activity.getApplication(), which is
+     * an android.app.Application and therefore cannot see our own members. Ask for ours instead.
+     */
+    protected val app: Application
+        get() = applicationContext as Application
 
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(newBase.withSelectedLanguage())
@@ -59,7 +66,7 @@ open class BaseActivity : AppCompatActivity() {
      */
     private fun applyBackground() {
         val fallback = themeWindowBackground()
-        val settings = application.preferenceDataSource.getBackground(this)
+        val settings = app.preferenceDataSource.getBackground(this)
         val effective = settings.withImagePath(screenBackgroundPath ?: settings.imagePath)
 
         if (!effective.isSet) {

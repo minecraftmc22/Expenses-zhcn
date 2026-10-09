@@ -12,6 +12,7 @@ import com.minecraftmc22.expenses.home.presentation.DateRange
 import com.minecraftmc22.expenses.util.getCurrentTimestamp
 import io.reactivex.Completable
 import io.reactivex.Single
+import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers.io
 import org.json.JSONArray
 import org.json.JSONObject
@@ -63,9 +64,13 @@ class BackupManager(
     // Backup file
 
     fun export(): Single<String> {
-        return dataStore.getTags()
-            .zipWith(dataStore.getExpenses()) { tags, expenses -> write(tags, expenses) }
-            .subscribeOn(io())
+        return Single.zip(
+            dataStore.getTags(),
+            dataStore.getExpenses(),
+            BiFunction<List<Tag>, List<Expense>, String> { tags, expenses ->
+                write(tags, expenses)
+            }
+        ).subscribeOn(io())
     }
 
     /**
