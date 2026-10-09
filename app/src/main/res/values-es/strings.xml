@@ -46,6 +46,10 @@
     <string name="filter">Filtrar</string>
     <string name="filter_tags">Filtrar etiquetas</string>
     <string name="import_from_excel">Importar desde Excel (.xls)</string>
+    <string name="google_sign_in_failed">Error al iniciar sesión con Google (%1$s). Comprueba que el inicio de sesión con Google esté habilitado en tu proyecto de Firebase y que el SHA-1 del certificado de firma esté registrado allí.</string>
+    <string name="google_sign_in_not_configured">El inicio de sesión con Google no está configurado en esta compilación. Habilita el proveedor de Google en Authentication de Firebase y vuelve a descargar google-services.json.</string>
+    <string name="language">Idioma</string>
+    <string name="select_language">Seleccionar idioma</string>
     <string name="light">Claro</string>
     <string name="name">Nombre</string>
     <string name="no">No</string>

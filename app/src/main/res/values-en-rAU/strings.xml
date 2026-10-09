@@ -46,6 +46,10 @@
     <string name="filter">Filter</string>
     <string name="filter_tags">Filter tags</string>
     <string name="import_from_excel">Import from Excel (.xls)</string>
+    <string name="google_sign_in_failed">Google sign-in failed (%1$s). Make sure Google sign-in is enabled in your Firebase project and that this build\'s signing certificate SHA-1 is registered there.</string>
+    <string name="google_sign_in_not_configured">Google sign-in is not configured for this build. Enable the Google provider under Firebase Authentication and download google-services.json again.</string>
+    <string name="language">Language</string>
+    <string name="select_language">Select language</string>
     <string name="light">Light</string>
     <string name="name">Name</string>
     <string name="no">No</string>

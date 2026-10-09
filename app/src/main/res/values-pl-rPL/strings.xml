@@ -46,6 +46,10 @@
     <string name="filter">Filtruj</string>
     <string name="filter_tags">Filtruj tagi</string>
     <string name="import_from_excel">Importuj z Excela (.xls)</string>
+    <string name="google_sign_in_failed">Logowanie przez Google nie powiodło się (%1$s). Sprawdź, czy logowanie przez Google jest włączone w Twoim projekcie Firebase i czy SHA-1 certyfikatu podpisu jest tam zarejestrowany.</string>
+    <string name="google_sign_in_not_configured">Logowanie przez Google nie jest skonfigurowane w tej kompilacji. Włącz dostawcę Google w Authentication w Firebase i pobierz google-services.json ponownie.</string>
+    <string name="language">Język</string>
+    <string name="select_language">Wybierz język</string>
     <string name="light">Jasny</string>
     <string name="name">Nazwa</string>
     <string name="no">Nie</string>

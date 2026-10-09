@@ -92,6 +92,71 @@
 添加包名为 `com.minecraftmc22.expenses` 的 Android 应用（调试版包名是 `com.minecraftmc22.expenses.dev`），
 把下载到的 `google-services.json` 内容整份存成 `GOOGLE_SERVICES_JSON` secret 即可。
 
+### Google 登录失败怎么查
+
+从 0.3 起，登录失败不再被静默吞掉 —— 会弹窗显示错误码，例如「Google 登录失败（10）」。
+配置不全也不会再让编译失败，只会在点击登录时告诉你原因。
+
+| 提示 | 含义 | 处理 |
+| --- | --- | --- |
+| 「还没有配置 Google 登录」 | `google-services.json` 里 `oauth_client` 是空数组 | 到 Firebase → Authentication 启用 **Google** 登录方式，然后**重新下载** `google-services.json` |
+| `10` | 签名证书或 OAuth 客户端 ID 与项目不匹配 | 把**实际签名所用** keystore 的 SHA-1 登记到 Firebase 项目 |
+| `12500` | Google 登录未启用 | 到 Firebase 控制台启用 Google 登录方式 |
+| `12501` | 用户取消了账号选择 | 正常现象，重新点一次 |
+| `7` | 网络错误 | 检查网络或代理 |
+| `ERROR_` 开头 | Firebase 侧拒绝 | 多半是项目配置或 API key 问题，先确认没有在用占位配置 |
+| 一句话英文提示 | Google 没有返回 ID token | `default_web_client_id` 不属于本应用的项目，或签名证书未登记 |
+
+选完账号后如果是 **Google 自己**弹出「Access blocked / access_denied / 403」，那是 OAuth 同意屏幕还在
+**「测试」**状态：到 Google Cloud Console → **「OAuth 同意屏幕」** 发布应用，或把测试用的 Google 账号
+加进「测试用户」。
+
+> **反查已登记的 SHA-1**：`google-services.json` 里每个 `client_type: 1` 条目的 `certificate_hash`
+> 就是去掉冒号的 SHA-1。把它和 `Keystore fingerprint` 打出来的 `SHA1:` 对比，就能立刻确认签名密钥
+> 有没有登记 —— 不相等就是错误码 `10` 的根因。
+>
+> 另外 `client_type: 3` 的那一条就是 `default_web_client_id` 的来源；如果 `oauth_client` 里没有
+> `client_type: 3`，说明 Google 登录方式还没启用。
+
+> **用 Actions 打的 APK 默认登录不了**：没配置 `GOOGLE_SERVICES_JSON` secret 时用的是仓库里的占位配置
+> `app/google-services.json.ci`，它不对应任何真实项目，登录必然失败。这不是代码问题。
+
+要让登录真正可用，按顺序做：
+
+> **控制台是中文界面时**：`Authentication` 就是左侧「构建」分组下的**「身份验证」**
+>（和 Firestore、Storage 并列），里面的 `Sign-in method` 是**「登录方法」**；
+> `Project settings → Your apps` 是**「项目设置 → 您的应用」**。
+> 不想找菜单就直接用链接（把 `<项目ID>` 换成你的项目 ID）：
+>
+> - 启用 Google 登录：`https://console.firebase.google.com/project/<项目ID>/authentication/providers`
+> - 添加 SHA-1 指纹 / 下载 `google-services.json`：`https://console.firebase.google.com/project/<项目ID>/settings/general`
+
+1. 新建 Firebase 项目；
+2. 添加 Android 应用，包名 `com.minecraftmc22.expenses`（调试包名 `com.minecraftmc22.expenses.dev` 也加一个）；
+3. 在 **Authentication → Sign-in method** 里启用 **Google**；
+4. **登记签名证书的 SHA-1**（最容易漏的一步）：
+   - **最省事**：Actions → **Keystore fingerprint** → *Run workflow*，日志里会直接打出
+     `SHA1:` / `SHA256:`（工作流见 [`.github/workflows/keystore-fingerprint.yml`](.github/workflows/keystore-fingerprint.yml)）
+   - 手上有 APK 文件：`keytool -printcert -jarfile app-prod-release.apk`
+   - 手上有 keystore 文件：`keytool -list -v -keystore release.jks -alias <你的别名>`
+   - Windows 上 `keytool` 不在 PATH 时用全路径，例如
+     `"C:\Program Files\Java\jre1.8.0_421\bin\keytool.exe" -printcert -jarfile app-prod-release.apk`
+5. 下载新的 `google-services.json`，整份存成 `GOOGLE_SERVICES_JSON` secret；
+6. 重新跑一次 Actions，用新 APK 测试。
+
+> ℹ️ **Google 登录校验用的是 SHA-1（40 位十六进制），不能用 SHA-256 代替，也无法由 SHA-256 推算出来。**
+> SHA-256 是可选的附加指纹。
+>
+> 配了签名 Secret 之后，**调试包也用同一把 release keystore 签名**，所以 `app-prod-release.apk` 和
+> `app-prod-debug.apk` 指纹相同，注册一次两个都能用 Google 登录。没配签名 Secret 时调试包由
+> GitHub runner 自己的调试密钥签名，那个指纹无法登记，登录不了。
+>
+> 另外：**添加 SHA-1 之后不需要重新下载 `google-services.json`**（指纹不存在于该文件里）；
+> 但**启用 Google 登录方式之后需要**重新下载，因为 `oauth_client` 会新增内容。
+
+换了签名密钥（例如从调试密钥换到正式密钥）就要重新登记 SHA-1，否则错误码会再次变成 `10`。
+
+
 ## 本地构建
 
 需要 JDK 8 与 Android SDK（`platforms;android-29`、`build-tools;29.0.2`）。

@@ -3,6 +3,7 @@ package com.minecraftmc22.expenses.data.preference
 import android.content.Context
 import androidx.preference.PreferenceManager
 import com.minecraftmc22.expenses.R
+import com.minecraftmc22.expenses.common.presentation.Language
 import com.minecraftmc22.expenses.common.presentation.Theme
 import com.minecraftmc22.expenses.data.model.Currency
 import com.minecraftmc22.expenses.home.presentation.DateRange
@@ -57,6 +58,19 @@ class PreferenceDataSource {
         preferences.edit().putString(key, theme.name).apply()
     }
 
+    fun getLanguage(context: Context): Language {
+        val preferences = PreferenceManager.getDefaultSharedPreferences(context)
+        val key = getLanguageKey(context)
+        return preferences.getString(key, null)?.let { Language.valueOf(it) }
+            ?: Language.SYSTEM_DEFAULT
+    }
+
+    fun setLanguage(context: Context, language: Language) {
+        val preferences = PreferenceManager.getDefaultSharedPreferences(context)
+        val key = getLanguageKey(context)
+        preferences.edit().putString(key, language.name).apply()
+    }
+
     private fun getDefaultCurrencyKey(context: Context) =
         context.getString(R.string.key_default_currency)
 
@@ -68,4 +82,7 @@ class PreferenceDataSource {
 
     private fun getThemeKey(context: Context) =
         context.getString(R.string.key_theme)
+
+    private fun getLanguageKey(context: Context) =
+        context.getString(R.string.key_language)
 }

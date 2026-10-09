@@ -17,10 +17,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.minecraftmc22.expenses.R
+import com.minecraftmc22.expenses.common.presentation.Language
 import com.minecraftmc22.expenses.common.presentation.Theme
 import com.minecraftmc22.expenses.currencyselection.CurrencySelectionActivity
 import com.minecraftmc22.expenses.data.model.Currency
 import com.minecraftmc22.expenses.onboarding.OnboardingActivity
+import com.minecraftmc22.expenses.splash.SplashActivity
 import com.minecraftmc22.expenses.util.extensions.application
 import com.minecraftmc22.expenses.util.extensions.plusAssign
 import com.minecraftmc22.expenses.util.extensions.startActivitySafely
@@ -86,6 +88,8 @@ class SettingsFragment : Fragment() {
         compositeDisposable += model.showActivity.subscribe(::showActivity)
         compositeDisposable += model.showThemeSelectionDialog.subscribe(::showThemeSelectionDialog)
         compositeDisposable += model.applyTheme.subscribe(::applyTheme)
+        compositeDisposable += model.showLanguageSelectionDialog.subscribe(::showLanguageSelectionDialog)
+        compositeDisposable += model.restartApplication.subscribe(::restartApplication)
     }
 
     private fun selectDefaultCurrency() {
@@ -117,6 +121,22 @@ class SettingsFragment : Fragment() {
     private fun navigateToOnboarding() {
         OnboardingActivity.start(requireContext())
         requireActivity().finishAffinity()
+    }
+
+    private fun showLanguageSelectionDialog(currentLanguage: Language) {
+        val dialogFragment = LanguageSelectionDialogFragment.newInstance(currentLanguage)
+        dialogFragment.onLanguageSelected = { model.languageSelected(it) }
+        dialogFragment.show(requireFragmentManager(), LanguageSelectionDialogFragment.TAG)
+    }
+
+    /**
+     * A new language only takes effect once the activities are created again,
+     * so the whole task is restarted on top of the splash activity.
+     */
+    private fun restartApplication() {
+        val intent = Intent(requireContext(), SplashActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        requireActivity().startActivitySafely(intent)
     }
 
     // Lifecycle end

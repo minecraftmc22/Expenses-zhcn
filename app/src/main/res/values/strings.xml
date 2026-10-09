@@ -48,6 +48,15 @@
     <string name="filter">Filter</string>
     <string name="filter_tags">Filter tags</string>
     <string name="import_from_excel">Import from Excel (.xls)</string>
+    <string name="google_sign_in_failed">Google sign-in failed (%1$s). Make sure Google sign-in is enabled in your Firebase project and that this build\'s signing certificate SHA-1 is registered there.</string>
+    <string name="google_sign_in_not_configured">Google sign-in is not configured for this build. Enable the Google provider under Firebase Authentication and download google-services.json again.</string>
+    <string name="language">Language</string>
+    <string name="select_language">Select language</string>
+    <string name="language_simplified_chinese" translatable="false">简体中文</string>
+    <string name="language_traditional_chinese" translatable="false">繁體中文</string>
+    <string name="language_english" translatable="false">English</string>
+    <string name="language_spanish" translatable="false">Español</string>
+    <string name="language_polish" translatable="false">Polski</string>
     <string name="light">Light</string>
     <string name="name">Name</string>
     <string name="no">No</string>
@@ -89,5 +98,6 @@
     <string name="key_default_currency" translatable="false">default_currency</string>
     <string name="key_date_range" translatable="false">date_range</string>
     <string name="key_is_user_onboarded" translatable="false">is_user_onboarded</string>
+    <string name="key_language" translatable="false">language</string>
     <string name="key_theme" translatable="false">theme</string>
 </resources>

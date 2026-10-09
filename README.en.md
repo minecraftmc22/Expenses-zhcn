@@ -93,6 +93,74 @@ To enable cloud sync, create a project in the [Firebase console](https://console
 register the Android app `com.minecraftmc22.expenses` (the debug build is `com.minecraftmc22.expenses.dev`),
 and store the whole downloaded `google-services.json` as the `GOOGLE_SERVICES_JSON` secret.
 
+### When Google sign-in fails
+
+Since 0.3 a failed sign-in is no longer swallowed — the app shows the error code, for example
+"Google sign-in failed (10)". An incomplete configuration no longer breaks the build either; it is
+reported when you tap sign-in.
+
+| What you see | Meaning | What to do |
+| --- | --- | --- |
+| "Google sign-in is not configured for this build" | `oauth_client` in `google-services.json` is an empty array | Enable the **Google** provider under Firebase → Authentication, then **download `google-services.json` again** |
+| `10` | Signing certificate or OAuth client ID does not match the project | Register the SHA-1 of the keystore you actually sign with |
+| `12500` | Google sign-in is not enabled | Enable the Google sign-in provider in the Firebase console |
+| `12501` | The user cancelled the account picker | Normal, just try again |
+| `7` | Network error | Check the network or proxy |
+| starts with `ERROR_` | Rejected by Firebase | Usually a project/API key problem — first check you are not on the placeholder config |
+| a plain English sentence | Google returned no ID token | `default_web_client_id` does not belong to this app's project, or the signing certificate is not registered |
+
+If **Google itself** shows "Access blocked / access_denied / 403" after picking an account, the OAuth
+consent screen is still in **Testing**: publish it in Google Cloud Console → **OAuth consent screen**,
+or add your Google account under **Test users**.
+
+> **Looking up which SHA-1 is registered**: in `google-services.json`, the `certificate_hash` of every
+> `client_type: 1` entry is a SHA-1 without the colons. Compare it with the `SHA1:` line printed by the
+> Keystore fingerprint workflow — if they differ, that is the cause of error `10`.
+>
+> The `client_type: 3` entry is what produces `default_web_client_id`; when no such entry exists, the
+> Google sign-in provider has not been enabled yet.
+
+> **An APK built by Actions cannot sign in by default**: without the `GOOGLE_SERVICES_JSON` secret it is
+> built with the bundled placeholder `app/google-services.json.ci`, which matches no real project.
+> That is not a code problem.
+
+To make sign-in actually work:
+
+> Direct links are the quickest way to the right pages (replace `<PROJECT_ID>` with your project id):
+>
+> - enable Google sign-in: `https://console.firebase.google.com/project/<PROJECT_ID>/authentication/providers`
+> - add the SHA-1 fingerprint / download `google-services.json`:
+>   `https://console.firebase.google.com/project/<PROJECT_ID>/settings/general`
+
+1. Create a Firebase project.
+2. Add the Android app `com.minecraftmc22.expenses` (and `com.minecraftmc22.expenses.dev` for debug builds).
+3. Enable **Google** under **Authentication → Sign-in method**.
+4. **Register the signing certificate SHA-1** (the step people forget):
+   - **Easiest**: Actions → **Keystore fingerprint** → *Run workflow*; the log prints the
+     `SHA1:` / `SHA256:` lines (see [`.github/workflows/keystore-fingerprint.yml`](.github/workflows/keystore-fingerprint.yml))
+   - If you have the APK: `keytool -printcert -jarfile app-prod-release.apk`
+   - If you have the keystore: `keytool -list -v -keystore release.jks -alias <your alias>`
+   - On Windows `keytool` is usually not on PATH, so use the full path, for example
+     `"C:\Program Files\Java\jre1.8.0_421\bin\keytool.exe" -printcert -jarfile app-prod-release.apk`
+5. Download the new `google-services.json` and store it as the `GOOGLE_SERVICES_JSON` secret.
+6. Re-run the workflow and test the new APK.
+
+> ℹ️ **Google sign-in validates against the SHA-1 (40 hex digits). SHA-256 neither replaces it nor can
+> it be derived from it**; SHA-256 is an optional extra fingerprint.
+>
+> With the signing secrets configured, **debug builds are signed with the same release keystore**, so
+> `app-prod-release.apk` and `app-prod-debug.apk` share one fingerprint and registering it once covers
+> both. Without the secrets the debug APK is signed with the GitHub runner's own debug key, whose
+> fingerprint cannot be registered, so sign-in will not work there.
+>
+> Also: **adding a SHA-1 does not require downloading `google-services.json` again** (fingerprints
+> are not part of that file), but **enabling the Google provider does**, because that adds the
+> `oauth_client` entries.
+
+Whenever the signing key changes (for example from the debug key to the release key) the SHA-1 has to be
+registered again, otherwise the code goes back to `10`.
+
+
 ## Local build
 
 Requires JDK 8 and the Android SDK (`platforms;android-29`, `build-tools;29.0.2`).

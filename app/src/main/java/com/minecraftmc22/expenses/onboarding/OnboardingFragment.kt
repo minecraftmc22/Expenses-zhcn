@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.minecraftmc22.expenses.R
 import com.minecraftmc22.expenses.home.presentation.HomeActivity
 import com.minecraftmc22.expenses.util.extensions.application
@@ -59,6 +60,9 @@ class OnboardingFragment : Fragment() {
         compositeDisposable += model.navigateToHome
             .toObservable()
             .subscribe { navigateToHome() }
+        compositeDisposable += model.showGoogleSignInError
+            .toObservable()
+            .subscribe { showGoogleSignInError(it) }
     }
 
     private fun enableOrDisableButtons(isLoading: Boolean) {
@@ -73,6 +77,14 @@ class OnboardingFragment : Fragment() {
     private fun navigateToHome() {
         HomeActivity.start(requireContext())
         requireActivity().finish()
+    }
+
+    private fun showGoogleSignInError(message: String) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setMessage(message)
+            .setPositiveButton(R.string.ok) { _, _ -> }
+            .create()
+            .show()
     }
 
     override fun onDestroyView() {

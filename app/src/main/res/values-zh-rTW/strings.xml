@@ -46,6 +46,10 @@
     <string name="filter">篩選</string>
     <string name="filter_tags">篩選標籤</string>
     <string name="import_from_excel">從 Excel 匯入 (.xls)</string>
+    <string name="google_sign_in_failed">Google 登入失敗（%1$s）。請確認 Firebase 專案已啟用 Google 登入，並已登記本安裝檔簽章憑證的 SHA-1。</string>
+    <string name="google_sign_in_not_configured">這個安裝檔還沒設定 Google 登入。請先在 Firebase 的 Authentication 啟用 Google 登入方式，然後重新下載 google-services.json。</string>
+    <string name="language">語言</string>
+    <string name="select_language">選擇語言</string>
     <string name="light">淺色</string>
     <string name="name">名稱</string>
     <string name="no">否</string>

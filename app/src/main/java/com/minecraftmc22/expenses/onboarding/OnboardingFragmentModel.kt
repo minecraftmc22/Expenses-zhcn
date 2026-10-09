@@ -5,7 +5,10 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.gms.common.api.ApiException
+import com.google.firebase.auth.FirebaseAuthException
 import com.minecraftmc22.expenses.Application
+import com.minecraftmc22.expenses.R
 import com.minecraftmc22.expenses.authentication.AuthenticationManager
 import com.minecraftmc22.expenses.data.preference.PreferenceDataSource
 import com.minecraftmc22.expenses.util.extensions.plusAssign
@@ -24,6 +27,7 @@ class OnboardingFragmentModel(
 
     val requestGoogleSignIn = DataEvent<Intent>()
     val navigateToHome = Event()
+    val showGoogleSignInError = DataEvent<String>()
 
     private val disposables = CompositeDisposable()
 
@@ -32,7 +36,15 @@ class OnboardingFragmentModel(
     }
 
     fun continueWithGoogleRequested() {
-        requestGoogleSignIn.next(authenticationManager.getGoogleSignInRequest())
+        val request = authenticationManager.getGoogleSignInRequest()
+
+        if (request == null) {
+            showGoogleSignInError.next(
+                getApplication<Application>().getString(R.string.google_sign_in_not_configured)
+            )
+        } else {
+            requestGoogleSignIn.next(request)
+        }
     }
 
     fun handleGoogleSignInResult(result: Intent) {
@@ -49,8 +61,29 @@ class OnboardingFragmentModel(
             }, { error ->
                 isLoading.value = false
 
-                Log.w(TAG, "Failed to sign in with Google, cause: ($error).")
+                Log.w(TAG, "Failed to sign in with Google.", error)
+
+                val message = getApplication<Application>().getString(
+                    R.string.google_sign_in_failed,
+                    describeSignInError(error)
+                )
+
+                showGoogleSignInError.next(message)
             })
+    }
+
+    /**
+     * Turns the failure into the short code a developer can look up, because the
+     * message of [ApiException] is often empty and the code is the only useful part.
+     */
+    private fun describeSignInError(error: Throwable): String {
+        val code = when (error) {
+            is ApiException -> error.statusCode.toString()
+            is FirebaseAuthException -> error.errorCode.orEmpty()
+            else -> ""
+        }
+
+        return if (code.isNotEmpty()) code else error.localizedMessage ?: error.javaClass.simpleName
     }
 
     private fun finishOnboardingAndNavigateHome() {

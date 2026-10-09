@@ -1,5 +1,6 @@
 package com.minecraftmc22.expenses
 
+import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -13,6 +14,7 @@ import com.minecraftmc22.expenses.data.preference.PreferenceDataSource
 import com.minecraftmc22.expenses.data.room.ApplicationDatabase
 import com.minecraftmc22.expenses.data.room.RoomDataStore
 import com.minecraftmc22.expenses.data.store.DataStore
+import com.minecraftmc22.expenses.util.extensions.withLanguage
 
 class Application : android.app.Application() {
 
@@ -54,6 +56,14 @@ class Application : android.app.Application() {
 
     val configuration: Configuration by lazy {
         FirebaseConfiguration(FirebaseRemoteConfig.getInstance())
+    }
+
+    /**
+     * Localizes everything that reads strings from the application context,
+     * such as the settings list built by the view models.
+     */
+    override fun attachBaseContext(base: Context) {
+        super.attachBaseContext(base.withLanguage(preferenceDataSource.getLanguage(base)))
     }
 
     override fun onCreate() {

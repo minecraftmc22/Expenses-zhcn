@@ -1,10 +1,12 @@
 package com.minecraftmc22.expenses.common.presentation
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import com.minecraftmc22.expenses.R
+import com.minecraftmc22.expenses.util.extensions.withSelectedLanguage
 
 @SuppressLint("Registered")
 open class BaseActivity : AppCompatActivity() {
@@ -16,6 +18,10 @@ open class BaseActivity : AppCompatActivity() {
     }
 
     protected open var animationKind = ANIMATION_DEFAULT
+
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(newBase.withSelectedLanguage())
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

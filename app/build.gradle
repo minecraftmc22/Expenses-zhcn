@@ -63,6 +63,12 @@ android {
     buildTypes {
         debug {
             debuggable true
+            // Sign debug builds with the release key too when it is available, so both
+            // APKs share a single fingerprint that can be registered for Google sign-in.
+            // Without the properties the default debug keystore is used.
+            if (hasReleaseSigning) {
+                signingConfig signingConfigs.release
+            }
         }
 
         release {
@@ -81,7 +87,7 @@ android {
             versionNameSuffix "-dev"
             applicationIdSuffix ".dev"
             // Use only a few resource configurations to build faster.
-            resConfigs "en", "zh", "xxhdpi"
+            resConfigs "en", "zh", "es", "pl", "xxhdpi"
         }
 
         prod {}

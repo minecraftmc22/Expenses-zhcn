@@ -9,6 +9,7 @@ import com.minecraftmc22.expenses.Application
 import com.minecraftmc22.expenses.BuildConfig
 import com.minecraftmc22.expenses.R
 import com.minecraftmc22.expenses.authentication.AuthenticationManager
+import com.minecraftmc22.expenses.common.presentation.Language
 import com.minecraftmc22.expenses.common.presentation.Theme
 import com.minecraftmc22.expenses.data.model.Currency
 import com.minecraftmc22.expenses.data.preference.PreferenceDataSource
@@ -29,6 +30,8 @@ class SettingsFragmentModel(
     val showActivity = DataEvent<Uri>()
     val showThemeSelectionDialog = DataEvent<Theme>()
     val applyTheme = DataEvent<Theme>()
+    val showLanguageSelectionDialog = DataEvent<Language>()
+    val restartApplication = Event()
 
     private val disposables = CompositeDisposable()
 
@@ -94,6 +97,7 @@ class SettingsFragmentModel(
         itemModels += createApplicationHeader(context)
         itemModels += createDefaultCurrency(context)
         itemModels += createDarkMode(context)
+        itemModels += createLanguage(context)
 
         return itemModels
     }
@@ -130,6 +134,16 @@ class SettingsFragmentModel(
 
         return SummaryActionSettingItemModel(title, summary).apply {
             click = { showThemeSelectionDialog.next(darkMode) }
+        }
+    }
+
+    private fun createLanguage(context: Context): SettingItemModel {
+        val title = context.getString(R.string.language)
+
+        val language = preferenceDataSource.getLanguage(context)
+
+        return SummaryActionSettingItemModel(title, language.toDisplayName(context)).apply {
+            click = { showLanguageSelectionDialog.next(language) }
         }
     }
 
@@ -180,6 +194,16 @@ class SettingsFragmentModel(
         loadItemModels()
 
         applyTheme.next(theme)
+    }
+
+    fun languageSelected(language: Language) {
+        getApplication<Application>().let {
+            preferenceDataSource.setLanguage(it, language)
+        }
+
+        loadItemModels()
+
+        restartApplication.next()
     }
 
     @Suppress("UNCHECKED_CAST")
