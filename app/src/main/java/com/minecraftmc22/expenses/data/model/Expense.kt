@@ -13,7 +13,19 @@ data class Expense(
     val tags: List<Tag>,
     val date: LocalDate,
     val notes: String,
-    val timestamp: Long?
+    val timestamp: Long?,
+    /**
+     * Path of the picture drawn behind this expense. Null means "not set", in which case the
+     * detail screen falls back to the first image attachment.
+     */
+    val background: String? = null,
+    /**
+     * Identity that survives a trip through a backup or a WebDAV file. Row ids are per device
+     * (and per data store), so merging two devices by id would duplicate everything.
+     */
+    val uuid: String? = null,
+    /** When this expense was last written, used to pick the winner while merging. */
+    val modifiedAt: Long? = null
 ) : Parcelable, Comparable<Expense> {
 
     /**

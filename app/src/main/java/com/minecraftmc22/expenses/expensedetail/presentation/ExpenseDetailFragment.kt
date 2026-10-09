@@ -1,9 +1,13 @@
 package com.minecraftmc22.expenses.expensedetail.presentation
 
 import android.os.Bundle
+import android.text.TextUtils
 import android.view.*
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
@@ -11,9 +15,12 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.minecraftmc22.expenses.R
+import com.minecraftmc22.expenses.common.presentation.BaseActivity
+import com.minecraftmc22.expenses.data.model.Attachment
 import com.minecraftmc22.expenses.data.model.Tag
 import com.minecraftmc22.expenses.util.extensions.application
 import com.minecraftmc22.expenses.util.extensions.plusAssign
+import com.minecraftmc22.expenses.util.loadThumbnail
 import com.minecraftmc22.expenses.addeditexpense.presentation.AddEditExpenseActivity
 import io.reactivex.disposables.CompositeDisposable
 
@@ -26,6 +33,8 @@ class ExpenseDetailFragment : Fragment() {
     private lateinit var chipGroup: ChipGroup
     private lateinit var dateText: TextView
     private lateinit var notesText: TextView
+    private lateinit var noAttachmentsText: TextView
+    private lateinit var attachmentsContainer: LinearLayout
 
     private lateinit var model: ExpenseDetailFragmentModel
     private val compositeDisposable = CompositeDisposable()
@@ -56,6 +65,8 @@ class ExpenseDetailFragment : Fragment() {
         chipGroup = view.findViewById(R.id.chip_group)
         dateText = view.findViewById(R.id.text_date)
         notesText = view.findViewById(R.id.text_notes)
+        noAttachmentsText = view.findViewById(R.id.text_no_attachments)
+        attachmentsContainer = view.findViewById(R.id.container_attachments)
     }
 
     private fun setupActionBar() {
@@ -87,6 +98,51 @@ class ExpenseDetailFragment : Fragment() {
         compositeDisposable += model.finish
             .toObservable()
             .subscribe { requireActivity().onBackPressed() }
+        compositeDisposable += model.attachments
+            .toObservable()
+            .subscribe { configureAttachments(it) }
+        compositeDisposable += model.background
+            .toObservable()
+            .subscribe { applyBackground(it) }
+    }
+
+    // Background and attachments
+
+    private fun applyBackground(path: String) {
+        (activity as? BaseActivity)?.setScreenBackground(path.ifEmpty { null })
+    }
+
+    private fun configureAttachments(attachments: List<Attachment>) {
+        attachmentsContainer.removeAllViews()
+        attachments.forEach { attachmentsContainer.addView(createAttachmentPreview(it)) }
+
+        noAttachmentsText.isVisible = attachments.isEmpty()
+    }
+
+    private fun createAttachmentPreview(attachment: Attachment): View {
+        val density = resources.displayMetrics.density
+        val size = (ATTACHMENT_PREVIEW_DP * density).toInt()
+        val spacing = (ATTACHMENT_SPACING_DP * density).toInt()
+
+        return AppCompatImageView(requireContext()).apply {
+            layoutParams = LinearLayout.LayoutParams(size, size).apply { marginEnd = spacing }
+
+            val bitmap = if (attachment.isImage) {
+                loadThumbnail(attachment.path, size)
+            } else {
+                null
+            }
+
+            if (bitmap != null) {
+                scaleType = ImageView.ScaleType.CENTER_CROP
+                setImageBitmap(bitmap)
+            } else {
+                scaleType = ImageView.ScaleType.CENTER
+                setImageResource(R.drawable.ic_attachment_24dp)
+            }
+
+            contentDescription = attachment.name
+        }
     }
 
     private fun configureChipGroup(tags: List<Tag>) {
@@ -119,6 +175,9 @@ class ExpenseDetailFragment : Fragment() {
 
         chipGroup.removeAllViews()
         noTagsText.isVisible = false
+
+        attachmentsContainer.removeAllViews()
+        noAttachmentsText.isVisible = false
 
         compositeDisposable.clear()
     }
@@ -156,5 +215,11 @@ class ExpenseDetailFragment : Fragment() {
             .setNegativeButton(R.string.no) { _, _ -> }
             .show()
         return true
+    }
+
+    companion object {
+
+        private const val ATTACHMENT_PREVIEW_DP = 56
+        private const val ATTACHMENT_SPACING_DP = 8
     }
 }

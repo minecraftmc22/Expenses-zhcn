@@ -7,6 +7,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.minecraftmc22.expenses.Application
 import com.minecraftmc22.expenses.R
+import com.minecraftmc22.expenses.data.attachment.AttachmentStore
+import com.minecraftmc22.expenses.data.model.Attachment
 import com.minecraftmc22.expenses.data.model.Expense
 import com.minecraftmc22.expenses.data.model.Tag
 import com.minecraftmc22.expenses.expensedetail.domain.DeleteExpenseUseCase
@@ -26,6 +28,7 @@ class ExpenseDetailFragmentModel(
     application: Application,
     private val observeExpenseUseCase: ObserveExpenseUseCase,
     private val deleteExpenseUseCase: DeleteExpenseUseCase,
+    private val attachmentStore: AttachmentStore,
     private var expense: Expense
 ) : AndroidViewModel(application) {
 
@@ -35,6 +38,10 @@ class ExpenseDetailFragmentModel(
     val tags = Variable(emptyList<Tag>())
     val date = Variable("")
     val notes = Variable("")
+    val attachments = Variable(emptyList<Attachment>())
+
+    /** Picture drawn behind this screen; empty means "use the global background". */
+    val background = Variable("")
 
     val showEdit = DataEvent<Expense>()
     val finish = Event()
@@ -45,6 +52,7 @@ class ExpenseDetailFragmentModel(
 
     init {
         observeExpense()
+        observeAttachments()
     }
 
     private fun observeExpense() {
@@ -58,6 +66,18 @@ class ExpenseDetailFragmentModel(
             })
     }
 
+    private fun observeAttachments() {
+        disposables += attachmentStore.observeAttachments(expense.id)
+            .subscribeOn(io())
+            .observeOn(mainThread())
+            .subscribe({ attachmentList ->
+                attachments.value = attachmentList
+                updateBackground()
+            }, { error ->
+                Log.w(TAG, "Failed to observe attachments: ($error).")
+            })
+    }
+
     private fun populateExpenseValues() {
         amount.value = "${"%.2f".format(expense.amount)} ${expense.currency.symbol}"
         currency.value = "(${expense.currency.title} • ${expense.currency.code})"
@@ -65,6 +85,15 @@ class ExpenseDetailFragmentModel(
         tags.value = expense.tags
         date.value = expense.date.toString(READABLE_DATE_FORMAT)
         notes.value = makeNotes(expense)
+
+        updateBackground()
+    }
+
+    /** The picture chosen for this expense, or else its first attached picture. */
+    private fun updateBackground() {
+        background.value = expense.background
+            ?: attachments.value.firstOrNull { it.isImage }?.path
+            ?: ""
     }
 
     private fun makeNotes(expense: Expense): String {
@@ -88,6 +117,7 @@ class ExpenseDetailFragmentModel(
 
     fun delete() {
         disposables += deleteExpenseUseCase(expense)
+            .andThen(attachmentStore.deleteAttachments(expense.id))
             .subscribeOn(io())
             .observeOn(mainThread())
             .subscribe({
@@ -111,6 +141,7 @@ class ExpenseDetailFragmentModel(
                 application,
                 observeExpenseUseCase,
                 deleteExpenseUseCase,
+                application.attachmentStore,
                 expense
             ) as T
         }

@@ -2,9 +2,15 @@ package com.minecraftmc22.expenses.addeditexpense.presentation
 
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.text.TextUtils
 import android.view.*
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatImageView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -13,9 +19,11 @@ import com.google.android.material.chip.Chip
 import com.minecraftmc22.expenses.R
 import com.minecraftmc22.expenses.addeditexpense.presentation.dateselection.DateSelectionDialogFragment
 import com.minecraftmc22.expenses.currencyselection.CurrencySelectionActivity
+import com.minecraftmc22.expenses.data.model.Attachment
 import com.minecraftmc22.expenses.data.model.Currency
 import com.minecraftmc22.expenses.data.model.Tag
 import com.minecraftmc22.expenses.util.READABLE_DATE_FORMAT
+import com.minecraftmc22.expenses.util.loadThumbnail
 import com.minecraftmc22.expenses.util.extensions.*
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.fragment_add_edit_expense.*
@@ -67,6 +75,9 @@ class AddEditExpenseFragment : Fragment() {
         textSymbol.setOnClickListener { showCurrencySelection() }
         containerTags.setOnClickListener { showTagSelection() }
         textDate.setOnClickListener { showDateSelection() }
+        buttonAddAttachment.setOnClickListener { showAttachmentPicker() }
+        buttonChooseExpenseBackground.setOnClickListener { showBackgroundPicker() }
+        buttonClearExpenseBackground.setOnClickListener { model.clearBackground() }
     }
 
     private fun showCurrencySelection() {
@@ -81,6 +92,25 @@ class AddEditExpenseFragment : Fragment() {
         DateSelectionDialogFragment.newInstance().apply {
             dateSelected = { y, m, d -> model.selectDate(y, m, d) }
         }.show(requireFragmentManager(), DateSelectionDialogFragment.TAG)
+    }
+
+    private fun showAttachmentPicker() {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = ANY_MIME_TYPE
+            putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+        }
+
+        startActivityForResult(intent, REQUEST_CODE_ADD_ATTACHMENTS)
+    }
+
+    private fun showBackgroundPicker() {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = IMAGE_MIME_TYPE
+        }
+
+        startActivityForResult(intent, REQUEST_CODE_CHOOSE_BACKGROUND)
     }
 
     private fun initializeModels() {
@@ -103,9 +133,83 @@ class AddEditExpenseFragment : Fragment() {
         disposables += model.selectedTags.toObservable().subscribe { updateTagLayout(it) }
         disposables += model.finish.toObservable().subscribe { finish() }
 
+        disposables += model.attachments.toObservable().subscribe {
+            updateAttachments(it)
+            updateBackgroundPreview()
+        }
+        disposables += model.background.toObservable().subscribe { updateBackgroundPreview() }
+
         editTextAmount.setText(makeEasilyEditableAmount(model.amount))
         editTextTitle.setText(model.title)
         editTextNotes.setText(model.notes)
+    }
+
+    // Attachments and background
+
+    private fun updateAttachments(attachments: List<Attachment>) {
+        containerAttachments.removeAllViews()
+        attachments.forEach { containerAttachments.addView(createAttachmentRow(it)) }
+
+        textNoAttachments.visibility = if (attachments.isEmpty()) View.VISIBLE else View.GONE
+    }
+
+    private fun createAttachmentRow(attachment: Attachment): View {
+        val density = resources.displayMetrics.density
+        val thumbnailSize = (ATTACHMENT_THUMBNAIL_DP * density).toInt()
+        val spacing = (ATTACHMENT_SPACING_DP * density).toInt()
+
+        val row = LinearLayout(requireContext()).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(0, spacing / 2, 0, spacing / 2)
+        }
+
+        val preview = AppCompatImageView(requireContext()).apply {
+            layoutParams = LinearLayout.LayoutParams(thumbnailSize, thumbnailSize)
+
+            val bitmap = if (attachment.isImage) {
+                loadThumbnail(attachment.path, thumbnailSize)
+            } else {
+                null
+            }
+
+            if (bitmap != null) {
+                scaleType = ImageView.ScaleType.CENTER_CROP
+                setImageBitmap(bitmap)
+            } else {
+                scaleType = ImageView.ScaleType.CENTER
+                setImageResource(R.drawable.ic_attachment_24dp)
+            }
+        }
+
+        val name = TextView(requireContext()).apply {
+            text = attachment.name
+            maxLines = 1
+            ellipsize = TextUtils.TruncateAt.MIDDLE
+            layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+                .apply { marginStart = spacing }
+        }
+
+        val remove = AppCompatImageView(requireContext()).apply {
+            setImageResource(R.drawable.ic_clear_24dp)
+            contentDescription = getString(R.string.remove)
+            setPadding(spacing / 2, spacing / 2, spacing / 2, spacing / 2)
+            setOnClickListener { model.removeAttachment(attachment) }
+        }
+
+        row.addView(preview)
+        row.addView(name)
+        row.addView(remove)
+
+        return row
+    }
+
+    private fun updateBackgroundPreview() {
+        val path = model.effectiveBackgroundPath
+        val bitmap = if (path.isNotEmpty()) loadThumbnail(path, BACKGROUND_PREVIEW_SIZE) else null
+
+        imageExpenseBackground.setImageBitmap(bitmap)
+        buttonClearExpenseBackground.isEnabled = model.background.value.isNotEmpty()
     }
 
     private fun makeEasilyEditableAmount(amount: Double?): String {
@@ -209,12 +313,39 @@ class AddEditExpenseFragment : Fragment() {
                     data?.getParcelableExtra(CurrencySelectionActivity.EXTRA_CURRENCY)
                 currency?.let { model.selectCurrency(it) }
             }
+            REQUEST_CODE_ADD_ATTACHMENTS -> {
+                model.addAttachments(collectPickedUris(data))
+            }
+            REQUEST_CODE_CHOOSE_BACKGROUND -> {
+                data?.data?.let { model.chooseBackground(it) }
+            }
         }
+    }
+
+    private fun collectPickedUris(data: Intent?): List<Uri> {
+        if (data == null) return emptyList()
+
+        val clipData = data.clipData
+        if (clipData != null) {
+            return (0 until clipData.itemCount).mapNotNull { clipData.getItemAt(it).uri }
+        }
+
+        return listOfNotNull(data.data)
     }
 
     companion object {
 
         private const val REQUEST_CODE_SELECT_CURRENCY = 1
+        private const val REQUEST_CODE_ADD_ATTACHMENTS = 2
+        private const val REQUEST_CODE_CHOOSE_BACKGROUND = 3
+
+        private const val ANY_MIME_TYPE = "*/*"
+        private const val IMAGE_MIME_TYPE = "image/*"
+
+        private const val BACKGROUND_PREVIEW_SIZE = 360
+
+        private const val ATTACHMENT_THUMBNAIL_DP = 44
+        private const val ATTACHMENT_SPACING_DP = 12
 
         private const val KEYBOARD_APPEARANCE_DELAY = 300L
     }

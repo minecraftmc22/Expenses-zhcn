@@ -32,11 +32,31 @@ fun Context.withLanguage(language: Language): Context {
 
     val configuration = Configuration(resources.configuration)
     configuration.setLocale(locale)
+    configuration.setLayoutDirection(locale)
 
     return createConfigurationContext(configuration)
 }
 
 fun Context.withSelectedLanguage(): Context = withLanguage(selectedLanguage)
+
+/**
+ * Re-applies [language] to the resources this context already has.
+ *
+ * Needed for contexts that cannot be replaced because they outlive the change, which is
+ * the case for the application context: the process is not recreated when the user picks
+ * another language. AppCompat applies its night mode the same way.
+ */
+fun Context.applyLanguageToResources(language: Language) {
+    val locale = language.toLocale() ?: systemLocale()
+    Locale.setDefault(locale)
+
+    val configuration = Configuration(resources.configuration)
+    configuration.setLocale(locale)
+    configuration.setLayoutDirection(locale)
+
+    @Suppress("DEPRECATION")
+    resources.updateConfiguration(configuration, resources.displayMetrics)
+}
 
 @Suppress("DEPRECATION")
 private fun systemLocale(): Locale =

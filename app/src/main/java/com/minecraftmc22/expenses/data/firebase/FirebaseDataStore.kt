@@ -78,6 +78,9 @@ class FirebaseDataStore(
             "tags" to expense.tags.map { mapOf("id" to it.id, "name" to it.name) },
             "date" to expense.date.toEpochMillis(),
             "notes" to expense.notes,
+            "background" to expense.background,
+            "uuid" to expense.uuid,
+            "modified_at" to expense.modifiedAt,
             "timestamp" to FieldValue.serverTimestamp()
         )
 
@@ -100,7 +103,10 @@ class FirebaseDataStore(
             "title" to expense.title,
             "tags" to expense.tags.map { mapOf("id" to it.id, "name" to it.name) },
             "date" to expense.date.toEpochMillis(),
-            "notes" to expense.notes
+            "notes" to expense.notes,
+            "background" to expense.background,
+            "uuid" to expense.uuid,
+            "modified_at" to expense.modifiedAt
         )
 
         return Completable.fromAction { expenseDocumentReference.update(data) }
@@ -211,6 +217,12 @@ class FirebaseDataStore(
 
         val timestamp = document.getTimestamp("timestamp")?.toDate()?.time
 
+        val background = document.getString("background")
+
+        val uuid = document.getString("uuid")
+
+        val modifiedAt = document.getLong("modified_at")
+
         return Expense(
             document.id,
             amount,
@@ -219,7 +231,10 @@ class FirebaseDataStore(
             tags,
             date,
             notes,
-            timestamp
+            timestamp,
+            background,
+            uuid,
+            modifiedAt
         )
     }
 

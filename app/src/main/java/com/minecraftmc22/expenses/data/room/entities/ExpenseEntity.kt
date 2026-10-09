@@ -9,6 +9,7 @@ import com.minecraftmc22.expenses.util.extensions.toExactDouble
 import com.minecraftmc22.expenses.util.extensions.toExactFloat
 import com.minecraftmc22.expenses.util.getCurrentTimestamp
 import org.threeten.bp.LocalDate
+import java.util.UUID
 
 @Entity(tableName = "expenses")
 data class ExpenseEntity(
@@ -19,7 +20,9 @@ data class ExpenseEntity(
     @ColumnInfo(name = "date") val date: LocalDate,
     @ColumnInfo(name = "notes") val notes: String,
     @ColumnInfo(name = "created_at") val createdAt: Long,
-    @ColumnInfo(name = "modified_at") val modifiedAt: Long
+    @ColumnInfo(name = "modified_at") val modifiedAt: Long,
+    @ColumnInfo(name = "background") val background: String?,
+    @ColumnInfo(name = "uuid") val uuid: String
 ) {
 
     fun mapToExpense(tagEntities: List<TagEntity>) =
@@ -31,7 +34,10 @@ data class ExpenseEntity(
             tags = tagEntities.map { it.mapToTag() },
             date = date,
             notes = notes,
-            timestamp = createdAt
+            timestamp = createdAt,
+            background = background,
+            uuid = uuid.ifEmpty { null },
+            modifiedAt = modifiedAt
         )
 
     companion object {
@@ -45,7 +51,9 @@ data class ExpenseEntity(
                 date = expense.date,
                 notes = expense.notes,
                 createdAt = getCurrentTimestamp(),
-                modifiedAt = 0L
+                modifiedAt = getCurrentTimestamp(),
+                background = expense.background,
+                uuid = expense.uuid ?: newUuid()
             )
 
         fun prepareForUpdate(expense: Expense) =
@@ -57,7 +65,9 @@ data class ExpenseEntity(
                 date = expense.date,
                 notes = expense.notes,
                 createdAt = expense.timestamp ?: 0L,
-                modifiedAt = 0L
+                modifiedAt = getCurrentTimestamp(),
+                background = expense.background,
+                uuid = expense.uuid ?: newUuid()
             )
 
         fun fromExpense(expense: Expense) =
@@ -69,7 +79,11 @@ data class ExpenseEntity(
                 date = expense.date,
                 notes = expense.notes,
                 createdAt = expense.timestamp ?: 0L,
-                modifiedAt = 0L
+                modifiedAt = expense.modifiedAt ?: 0L,
+                background = expense.background,
+                uuid = expense.uuid ?: newUuid()
             )
+
+        fun newUuid() = UUID.randomUUID().toString()
     }
 }

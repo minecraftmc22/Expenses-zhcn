@@ -1,12 +1,14 @@
 package com.minecraftmc22.expenses.settings.presentation
 
 import android.app.Dialog
+import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.minecraftmc22.expenses.R
 import com.minecraftmc22.expenses.common.presentation.Language
+import com.minecraftmc22.expenses.util.extensions.withSelectedLanguage
 
 class LanguageSelectionDialogFragment : DialogFragment(), DialogInterface.OnClickListener {
 
@@ -26,9 +28,13 @@ class LanguageSelectionDialogFragment : DialogFragment(), DialogInterface.OnClic
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return MaterialAlertDialogBuilder(requireActivity())
+        // Built on a context forced to the selected language, so the title and the
+        // system-default entry cannot fall back to a stale locale.
+        val context = requireContext().withSelectedLanguage()
+
+        return MaterialAlertDialogBuilder(context)
             .setTitle(R.string.select_language)
-            .setSingleChoiceItems(getItems(), getCheckedItem(), this)
+            .setSingleChoiceItems(getItems(context), getCheckedItem(), this)
             .setPositiveButton(R.string.ok) { _, _ ->
                 selectedLanguage?.let { onLanguageSelected?.invoke(it) }
             }
@@ -36,9 +42,9 @@ class LanguageSelectionDialogFragment : DialogFragment(), DialogInterface.OnClic
             .create()
     }
 
-    private fun getItems(): Array<String> {
+    private fun getItems(context: Context): Array<String> {
         return languages
-            .map { it.toDisplayName(requireContext()) }
+            .map { it.toDisplayName(context) }
             .toTypedArray()
     }
 

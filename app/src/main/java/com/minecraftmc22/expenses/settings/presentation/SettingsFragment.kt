@@ -9,18 +9,21 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.minecraftmc22.expenses.R
 import com.minecraftmc22.expenses.common.presentation.Language
 import com.minecraftmc22.expenses.common.presentation.Theme
 import com.minecraftmc22.expenses.currencyselection.CurrencySelectionActivity
 import com.minecraftmc22.expenses.data.model.Currency
+import com.minecraftmc22.expenses.data.webdav.SyncSummary
 import com.minecraftmc22.expenses.onboarding.OnboardingActivity
 import com.minecraftmc22.expenses.splash.SplashActivity
 import com.minecraftmc22.expenses.util.extensions.application
@@ -90,6 +93,12 @@ class SettingsFragment : Fragment() {
         compositeDisposable += model.applyTheme.subscribe(::applyTheme)
         compositeDisposable += model.showLanguageSelectionDialog.subscribe(::showLanguageSelectionDialog)
         compositeDisposable += model.restartApplication.subscribe(::restartApplication)
+        compositeDisposable += model.navigateToBackground.subscribe(::navigateToBackground)
+        compositeDisposable += model.exportRequested.subscribe(::exportBackup)
+        compositeDisposable += model.showImportConfirmation.subscribe(::confirmImport)
+        compositeDisposable += model.showWebDavSettings.subscribe(::showWebDavSettings)
+        compositeDisposable += model.syncNowRequested.subscribe { model.syncNow() }
+        compositeDisposable += model.showSyncResult.subscribe(::showSyncResult)
     }
 
     private fun selectDefaultCurrency() {
@@ -139,6 +148,73 @@ class SettingsFragment : Fragment() {
         requireActivity().startActivitySafely(intent)
     }
 
+    private fun navigateToBackground() {
+        BackgroundActivity.start(requireContext())
+    }
+
+    // Backup
+
+    private fun exportBackup() {
+        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = JSON_MIME_TYPE
+            putExtra(Intent.EXTRA_TITLE, DEFAULT_BACKUP_FILE_NAME)
+        }
+
+        startActivityForResult(intent, REQUEST_CODE_EXPORT_BACKUP)
+    }
+
+    private fun confirmImport() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setMessage(R.string.import_configuration_confirmation)
+            .setPositiveButton(R.string.yes) { _, _ -> pickBackupToImport() }
+            .setNegativeButton(R.string.no) { _, _ -> }
+            .show()
+    }
+
+    private fun pickBackupToImport() {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = JSON_MIME_TYPE
+        }
+
+        startActivityForResult(intent, REQUEST_CODE_IMPORT_BACKUP)
+    }
+
+    // WebDAV
+
+    private fun showWebDavSettings() {
+        val view = layoutInflater.inflate(R.layout.dialog_webdav, null)
+        val urlField = view.findViewById<EditText>(R.id.editTextWebDavUrl)
+        val userNameField = view.findViewById<EditText>(R.id.editTextWebDavUser)
+        val passwordField = view.findViewById<EditText>(R.id.editTextWebDavPassword)
+
+        urlField.setText(model.webDavUrl())
+        userNameField.setText(model.webDavUserName())
+        passwordField.setText(model.webDavPassword())
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.webdav_settings)
+            .setView(view)
+            .setPositiveButton(R.string.save) { _, _ ->
+                model.saveWebDavSettings(
+                    urlField.text.toString().trim(),
+                    userNameField.text.toString().trim(),
+                    passwordField.text.toString()
+                )
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    private fun showSyncResult(summary: SyncSummary) {
+        val message = getString(
+            R.string.webdav_sync_success, summary.added, summary.updated, summary.total
+        )
+
+        Snackbar.make(containerLayout, message, Snackbar.LENGTH_LONG).show()
+    }
+
     // Lifecycle end
 
     override fun onDestroyView() {
@@ -177,12 +253,23 @@ class SettingsFragment : Fragment() {
                     data?.getParcelableExtra(CurrencySelectionActivity.EXTRA_CURRENCY)
                 currency?.let { model.defaultCurrencySelected(it) }
             }
+            REQUEST_CODE_EXPORT_BACKUP -> {
+                data?.data?.let { model.exportTo(it) }
+            }
+            REQUEST_CODE_IMPORT_BACKUP -> {
+                data?.data?.let { model.importFrom(it) }
+            }
         }
     }
 
     companion object {
 
         private const val REQUEST_CODE_SELECT_DEFAULT_CURRENCY = 1
+        private const val REQUEST_CODE_EXPORT_BACKUP = 2
+        private const val REQUEST_CODE_IMPORT_BACKUP = 3
         private const val NIGHT_MODE_APPLICATION_DELAY = 500L
+
+        private const val JSON_MIME_TYPE = "application/json"
+        private const val DEFAULT_BACKUP_FILE_NAME = "expenses-backup.json"
     }
 }
