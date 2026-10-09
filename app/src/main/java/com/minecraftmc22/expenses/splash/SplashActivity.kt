@@ -9,6 +9,7 @@ import com.minecraftmc22.expenses.R
 import com.minecraftmc22.expenses.data.preference.PreferenceDataSource
 import com.minecraftmc22.expenses.home.presentation.HomeActivity
 import com.minecraftmc22.expenses.onboarding.OnboardingActivity
+import com.minecraftmc22.expenses.util.extensions.applyThemeColor
 import com.minecraftmc22.expenses.util.extensions.withSelectedLanguage
 
 class SplashActivity : AppCompatActivity() {
@@ -18,6 +19,8 @@ class SplashActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        applyThemeColor()
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
 

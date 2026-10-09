@@ -80,6 +80,14 @@
     <string name="webdav_syncing">正在同步喵…</string>
     <string name="webdav_sync_success">同步完成喵：新增 %1$d 条，更新 %2$d 条，一共 %3$d 条</string>
     <string name="webdav_sync_failure">同步失败了喵</string>
+    <string name="theme_color">主题颜色喵</string>
+    <string name="select_theme_color">选择主题颜色喵</string>
+    <string name="theme_color_default">默认的蓝喵</string>
+    <string name="theme_color_teal">蓝绿喵</string>
+    <string name="theme_color_green">绿绿喵</string>
+    <string name="theme_color_orange">橙橙喵</string>
+    <string name="theme_color_purple">紫紫喵</string>
+    <string name="theme_color_pink">粉粉喵</string>
     <string name="language">语言喵</string>
     <string name="select_language">选择语言喵</string>
     <string name="light">浅色喵</string>

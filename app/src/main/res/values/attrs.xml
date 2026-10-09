@@ -4,4 +4,11 @@
     <attr name="emphasisMediumAlpha" format="float"/>
     <attr name="emphasisLowAlpha" format="float"/>
     <attr name="emphasisDividerAlpha" format="float"/>
+
+    <!--
+      Accent the user picked in settings. It exists because the toolbar overlay has to read the
+      accent from a plain attribute: a theme overlay cannot reference colorPrimary while it is
+      itself the one defining colorPrimary.
+    -->
+    <attr name="themeColor" format="color"/>
 </resources>

@@ -12,6 +12,8 @@
         <item name="colorPrimaryVariant">@color/expenses_blue_dark</item>
         <item name="colorPrimaryDark">@color/expenses_blue_dark</item>
 
+        <item name="themeColor">@color/expenses_blue</item>
+
         <item name="colorSecondary">@color/expenses_red</item>
         <item name="colorOnSecondary">#FFFFFF</item>
 
@@ -94,7 +96,8 @@
     <!-- Toolbars - Theme Overlay -->
 
     <style name="ThemeOverlay.Expenses.Toolbar" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar">
-        <item name="colorPrimary">@color/expenses_blue</item>
+        <!-- Follows the accent picked in settings instead of pinning the toolbar to blue. -->
+        <item name="colorPrimary">?attr/themeColor</item>
     </style>
 
     <!-- TextInputLayout - Theme Overlay -->

@@ -21,6 +21,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.minecraftmc22.expenses.R
 import com.minecraftmc22.expenses.common.presentation.Language
 import com.minecraftmc22.expenses.common.presentation.Theme
+import com.minecraftmc22.expenses.common.presentation.ThemeColor
 import com.minecraftmc22.expenses.currencyselection.CurrencySelectionActivity
 import com.minecraftmc22.expenses.data.model.Currency
 import com.minecraftmc22.expenses.data.webdav.SyncSummary
@@ -91,6 +92,7 @@ class SettingsFragment : Fragment() {
         compositeDisposable += model.showActivity.subscribe(::showActivity)
         compositeDisposable += model.showThemeSelectionDialog.subscribe(::showThemeSelectionDialog)
         compositeDisposable += model.applyTheme.subscribe(::applyTheme)
+        compositeDisposable += model.showThemeColorSelectionDialog.subscribe(::showThemeColorSelectionDialog)
         compositeDisposable += model.showLanguageSelectionDialog.subscribe(::showLanguageSelectionDialog)
         compositeDisposable += model.restartApplication.subscribe(::restartApplication)
         compositeDisposable += model.navigateToBackground.subscribe(::navigateToBackground)
@@ -130,6 +132,12 @@ class SettingsFragment : Fragment() {
     private fun navigateToOnboarding() {
         OnboardingActivity.start(requireContext())
         requireActivity().finishAffinity()
+    }
+
+    private fun showThemeColorSelectionDialog(currentThemeColor: ThemeColor) {
+        val dialogFragment = ThemeColorSelectionDialogFragment.newInstance(currentThemeColor)
+        dialogFragment.onThemeColorSelected = { model.themeColorSelected(it) }
+        dialogFragment.show(requireFragmentManager(), ThemeColorSelectionDialogFragment.TAG)
     }
 
     private fun showLanguageSelectionDialog(currentLanguage: Language) {

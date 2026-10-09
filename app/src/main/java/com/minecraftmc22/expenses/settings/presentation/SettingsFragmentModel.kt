@@ -12,10 +12,12 @@ import com.minecraftmc22.expenses.R
 import com.minecraftmc22.expenses.authentication.AuthenticationManager
 import com.minecraftmc22.expenses.common.presentation.Language
 import com.minecraftmc22.expenses.common.presentation.Theme
+import com.minecraftmc22.expenses.common.presentation.ThemeColor
 import com.minecraftmc22.expenses.data.model.Currency
 import com.minecraftmc22.expenses.data.preference.PreferenceDataSource
 import com.minecraftmc22.expenses.data.webdav.SyncSummary
 import com.minecraftmc22.expenses.util.extensions.plusAssign
+import com.minecraftmc22.expenses.util.extensions.withSelectedLanguage
 import com.minecraftmc22.expenses.util.reactive.DataEvent
 import com.minecraftmc22.expenses.util.reactive.Event
 import com.minecraftmc22.expenses.util.reactive.Variable
@@ -46,6 +48,7 @@ class SettingsFragmentModel(
     val showWebDavSettings = Event()
     val syncNowRequested = Event()
     val showSyncResult = DataEvent<SyncSummary>()
+    val showThemeColorSelectionDialog = DataEvent<ThemeColor>()
 
     private val disposables = CompositeDisposable()
 
@@ -55,16 +58,47 @@ class SettingsFragmentModel(
         loadItemModels()
     }
 
+    /**
+     * The list is built from strings of the application context, whose resources keep the locale
+     * they had when the process started. This context is localized to the chosen language on
+     * demand, so the list still follows a language change when the platform refused to
+     * re-localize the application resources.
+     */
+    private val localizedContext: Context
+        get() = getApplication<Application>().withSelectedLanguage()
+
     private fun loadItemModels() {
         itemModels.value =
-            createAccountSection() + createApplicationSection() +
+            createAccountSection() + createThemeSection() + createApplicationSection() +
                 createBackupSection() + createWebDavSection() + createPrivacySection()
+    }
+
+    // Theme section
+
+    private fun createThemeSection(): List<SettingItemModel> {
+        val context = localizedContext
+
+        val itemModels = mutableListOf<SettingItemModel>()
+        itemModels += SettingsHeaderModel(context.getString(R.string.theme))
+        itemModels += createDarkMode(context)
+        itemModels += createThemeColor(context)
+
+        return itemModels
+    }
+
+    private fun createThemeColor(context: Context): SettingItemModel {
+        val title = context.getString(R.string.theme_color)
+        val themeColor = preferenceDataSource.getThemeColor(context)
+
+        return SummaryActionSettingItemModel(title, themeColor.toDisplayName(context)).apply {
+            click = { showThemeColorSelectionDialog.next(themeColor) }
+        }
     }
 
     // Account section
 
     private fun createAccountSection(): List<SettingItemModel> {
-        val context = getApplication<Application>()
+        val context = localizedContext
 
         val itemModels = mutableListOf<SettingItemModel>()
         itemModels += createAccountHeader(context)
@@ -106,12 +140,11 @@ class SettingsFragmentModel(
     // Application section
 
     private fun createApplicationSection(): List<SettingItemModel> {
-        val context = getApplication<Application>()
+        val context = localizedContext
 
         val itemModels = mutableListOf<SettingItemModel>()
         itemModels += createApplicationHeader(context)
         itemModels += createDefaultCurrency(context)
-        itemModels += createDarkMode(context)
         itemModels += createLanguage(context)
         itemModels += createBackground(context)
 
@@ -180,7 +213,7 @@ class SettingsFragmentModel(
     // Backup section
 
     private fun createBackupSection(): List<SettingItemModel> {
-        val context = getApplication<Application>()
+        val context = localizedContext
 
         val itemModels = mutableListOf<SettingItemModel>()
         itemModels += SettingsHeaderModel(context.getString(R.string.backup_and_restore))
@@ -209,7 +242,7 @@ class SettingsFragmentModel(
     // WebDAV section
 
     private fun createWebDavSection(): List<SettingItemModel> {
-        val context = getApplication<Application>()
+        val context = localizedContext
 
         val itemModels = mutableListOf<SettingItemModel>()
         itemModels += SettingsHeaderModel(context.getString(R.string.webdav_sync))
@@ -278,7 +311,7 @@ class SettingsFragmentModel(
     // About section
 
     private fun createPrivacySection(): List<SettingItemModel> {
-        val context = getApplication<Application>()
+        val context = localizedContext
 
         val itemModels = mutableListOf<SettingItemModel>()
         itemModels += createPrivacyHeader(context)
@@ -324,7 +357,18 @@ class SettingsFragmentModel(
         applyTheme.next(theme)
     }
 
-    fun languageSelected(language: Language) {        val application = getApplication<Application>()
+    fun themeColorSelected(themeColor: ThemeColor) {
+        preferenceDataSource.setThemeColor(getApplication(), themeColor)
+
+        loadItemModels()
+
+        // Every activity overlays its theme at the start of onCreate, so they all have to be
+        // created again for the accent to reach the action bars and the inflated views.
+        restartApplication.next()
+    }
+
+    fun languageSelected(language: Language) {
+        val application = getApplication<Application>()
 
         preferenceDataSource.setLanguage(application, language)
         // The process is not recreated by the restart below, so the strings owned by

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--
+      One overlay per accent a user can pick. The activity applies the chosen one on top of its
+      theme at the very start of onCreate, which repaints the toolbars, headers, buttons and the
+      amount highlights without touching any layout.
+    -->
+
+    <style name="ThemeOverlay.Expenses.ThemeColor.Default" parent="">
+        <item name="themeColor">@color/expenses_blue</item>
+        <item name="colorPrimary">@color/expenses_blue</item>
+        <item name="colorPrimaryVariant">@color/expenses_blue_dark</item>
+        <item name="colorPrimaryDark">@color/expenses_blue_dark</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+    </style>
+
+    <style name="ThemeOverlay.Expenses.ThemeColor.Teal" parent="">
+        <item name="themeColor">@color/theme_color_teal</item>
+        <item name="colorPrimary">@color/theme_color_teal</item>
+        <item name="colorPrimaryVariant">@color/theme_color_teal_dark</item>
+        <item name="colorPrimaryDark">@color/theme_color_teal_dark</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+    </style>
+
+    <style name="ThemeOverlay.Expenses.ThemeColor.Green" parent="">
+        <item name="themeColor">@color/theme_color_green</item>
+        <item name="colorPrimary">@color/theme_color_green</item>
+        <item name="colorPrimaryVariant">@color/theme_color_green_dark</item>
+        <item name="colorPrimaryDark">@color/theme_color_green_dark</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+    </style>
+
+    <style name="ThemeOverlay.Expenses.ThemeColor.Orange" parent="">
+        <item name="themeColor">@color/theme_color_orange</item>
+        <item name="colorPrimary">@color/theme_color_orange</item>
+        <item name="colorPrimaryVariant">@color/theme_color_orange_dark</item>
+        <item name="colorPrimaryDark">@color/theme_color_orange_dark</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+    </style>
+
+    <style name="ThemeOverlay.Expenses.ThemeColor.Purple" parent="">
+        <item name="themeColor">@color/theme_color_purple</item>
+        <item name="colorPrimary">@color/theme_color_purple</item>
+        <item name="colorPrimaryVariant">@color/theme_color_purple_dark</item>
+        <item name="colorPrimaryDark">@color/theme_color_purple_dark</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+    </style>
+
+    <style name="ThemeOverlay.Expenses.ThemeColor.Pink" parent="">
+        <item name="themeColor">@color/theme_color_pink</item>
+        <item name="colorPrimary">@color/theme_color_pink</item>
+        <item name="colorPrimaryVariant">@color/theme_color_pink_dark</item>
+        <item name="colorPrimaryDark">@color/theme_color_pink_dark</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+    </style>
+
+</resources>

@@ -28,17 +28,19 @@ class LanguageSelectionDialogFragment : DialogFragment(), DialogInterface.OnClic
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        // Built on a context forced to the selected language, so the title and the
-        // system-default entry cannot fall back to a stale locale.
-        val context = requireContext().withSelectedLanguage()
+        // The dialog itself must be built on the activity context, because that is the one
+        // carrying the Material theme; a configuration context has no theme and makes the
+        // Material dialog builder fail. Only the texts come from the localized context, which
+        // is what stops the title from falling back to a stale language.
+        val localized = requireContext().withSelectedLanguage()
 
-        return MaterialAlertDialogBuilder(context)
-            .setTitle(R.string.select_language)
-            .setSingleChoiceItems(getItems(context), getCheckedItem(), this)
-            .setPositiveButton(R.string.ok) { _, _ ->
+        return MaterialAlertDialogBuilder(requireContext())
+            .setTitle(localized.getString(R.string.select_language))
+            .setSingleChoiceItems(getItems(localized), getCheckedItem(), this)
+            .setPositiveButton(localized.getString(R.string.ok)) { _, _ ->
                 selectedLanguage?.let { onLanguageSelected?.invoke(it) }
             }
-            .setNegativeButton(R.string.cancel) { _, _ -> }
+            .setNegativeButton(localized.getString(R.string.cancel)) { _, _ -> }
             .create()
     }
 

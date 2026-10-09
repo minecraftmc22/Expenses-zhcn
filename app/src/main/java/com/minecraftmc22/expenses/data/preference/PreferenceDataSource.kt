@@ -6,6 +6,8 @@ import com.minecraftmc22.expenses.R
 import com.minecraftmc22.expenses.common.presentation.BackgroundSettings
 import com.minecraftmc22.expenses.common.presentation.Language
 import com.minecraftmc22.expenses.common.presentation.Theme
+import com.minecraftmc22.expenses.common.presentation.ThemeColor
+import com.minecraftmc22.expenses.common.presentation.Theme
 import com.minecraftmc22.expenses.data.model.Currency
 import com.minecraftmc22.expenses.home.presentation.DateRange
 
@@ -124,6 +126,28 @@ class PreferenceDataSource {
 
     private fun getBackgroundBrightnessKey(context: Context) =
         context.getString(R.string.key_background_brightness)
+
+    private fun getThemeColorKey(context: Context) =
+        context.getString(R.string.key_theme_color)
+
+    // Theme color
+
+    fun getThemeColor(context: Context): ThemeColor {
+        val preferences = PreferenceManager.getDefaultSharedPreferences(context)
+        val name = preferences.getString(getThemeColorKey(context), null)
+
+        return try {
+            name?.let { ThemeColor.valueOf(it) } ?: ThemeColor.DEFAULT
+        } catch (error: IllegalArgumentException) {
+            // A value written by a newer version, or one that no longer exists.
+            ThemeColor.DEFAULT
+        }
+    }
+
+    fun setThemeColor(context: Context, themeColor: ThemeColor) {
+        val preferences = PreferenceManager.getDefaultSharedPreferences(context)
+        preferences.edit().putString(getThemeColorKey(context), themeColor.name).apply()
+    }
 
     // WebDAV
 

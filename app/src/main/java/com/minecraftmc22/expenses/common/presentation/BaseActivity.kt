@@ -16,6 +16,7 @@ import androidx.navigation.findNavController
 import com.minecraftmc22.expenses.Application
 import com.minecraftmc22.expenses.R
 import com.minecraftmc22.expenses.util.BackgroundRenderer
+import com.minecraftmc22.expenses.util.extensions.applyThemeColor
 import com.minecraftmc22.expenses.util.extensions.withSelectedLanguage
 
 @SuppressLint("Registered")
@@ -111,6 +112,10 @@ open class BaseActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Before super.onCreate, so the action bar and every view inflated afterwards are
+        // painted with the accent picked in settings.
+        applyThemeColor()
+
         super.onCreate(savedInstanceState)
         overridePendingEnterTransition()
     }

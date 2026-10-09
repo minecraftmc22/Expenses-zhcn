@@ -12,6 +12,8 @@
         <item name="colorPrimaryVariant">@color/expenses_blue_dark</item>
         <item name="colorPrimaryDark">@color/expenses_blue_dark</item>
 
+        <item name="themeColor">@color/expenses_blue</item>
+
         <item name="colorSecondary">@color/expenses_red</item>
         <item name="colorOnSecondary">#FFFFFF</item>
 

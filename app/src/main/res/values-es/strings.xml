@@ -79,6 +79,14 @@
     <string name="webdav_syncing">Sincronizando…</string>
     <string name="webdav_sync_success">Sincronizado: %1$d añadidos, %2$d actualizados, %3$d en total</string>
     <string name="webdav_sync_failure">Error de sincronización</string>
+    <string name="theme_color">Color del tema</string>
+    <string name="select_theme_color">Elegir color del tema</string>
+    <string name="theme_color_default">Azul predeterminado</string>
+    <string name="theme_color_teal">Verde azulado</string>
+    <string name="theme_color_green">Verde</string>
+    <string name="theme_color_orange">Naranja</string>
+    <string name="theme_color_purple">Morado</string>
+    <string name="theme_color_pink">Rosa</string>
     <string name="language">Idioma</string>
     <string name="select_language">Seleccionar idioma</string>
     <string name="light">Claro</string>

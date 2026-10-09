@@ -27,7 +27,18 @@ enum class Language(val languageTag: String?) {
     SPANISH("es"),
     POLISH("pl-PL");
 
-    fun toLocale(): Locale? = languageTag?.let { Locale.forLanguageTag(it) }
+    fun toLocale(): Locale? = languageTag?.let { tag ->
+        val parts = tag.split("-")
+
+        // Plain language/region tags are built explicitly rather than through ICU, which can
+        // rewrite a tag it considers unusual. Neko_ZHCN depends on its region reaching the
+        // resource matcher unchanged, because that is what selects values-zh-rXX.
+        if (parts.size == 2 && parts[1].length == 2) {
+            Locale(parts[0], parts[1])
+        } else {
+            Locale.forLanguageTag(tag)
+        }
+    }
 
     /**
      * Every language is listed in its own language, so these labels are the

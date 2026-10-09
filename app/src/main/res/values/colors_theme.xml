@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--
+      Accents the user can pick in settings, each with a darker tone used for the primary variant
+      and the status bar. The default one is the blue the app already shipped with, so it lives
+      in colors.xml and is not repeated here.
+    -->
+
+    <color name="theme_color_teal">#00897B</color>
+    <color name="theme_color_teal_dark">#00695C</color>
+
+    <color name="theme_color_green">#43A047</color>
+    <color name="theme_color_green_dark">#2E7D32</color>
+
+    <color name="theme_color_orange">#EF6C00</color>
+    <color name="theme_color_orange_dark">#E65100</color>
+
+    <color name="theme_color_purple">#8E24AA</color>
+    <color name="theme_color_purple_dark">#6A1B9A</color>
+
+    <color name="theme_color_pink">#D81B60</color>
+    <color name="theme_color_pink_dark">#AD1457</color>
+
+</resources>

@@ -79,6 +79,14 @@
     <string name="webdav_syncing">正在同步…</string>
     <string name="webdav_sync_success">同步完成：新增 %1$d 条，更新 %2$d 条，共 %3$d 条</string>
     <string name="webdav_sync_failure">同步失败</string>
+    <string name="theme_color">主题颜色</string>
+    <string name="select_theme_color">选择主题颜色</string>
+    <string name="theme_color_default">默认蓝</string>
+    <string name="theme_color_teal">蓝绿</string>
+    <string name="theme_color_green">绿色</string>
+    <string name="theme_color_orange">橙色</string>
+    <string name="theme_color_purple">紫色</string>
+    <string name="theme_color_pink">粉色</string>
     <string name="language">语言</string>
     <string name="select_language">选择语言</string>
     <string name="light">浅色</string>

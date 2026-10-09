@@ -3,6 +3,7 @@ package com.minecraftmc22.expenses.util.extensions
 import android.content.Context
 import android.content.res.Configuration
 import android.content.res.Resources
+import android.util.Log
 import com.minecraftmc22.expenses.Application
 import com.minecraftmc22.expenses.common.presentation.Language
 import java.util.Locale
@@ -54,9 +55,18 @@ fun Context.applyLanguageToResources(language: Language) {
     configuration.setLocale(locale)
     configuration.setLayoutDirection(locale)
 
-    @Suppress("DEPRECATION")
-    resources.updateConfiguration(configuration, resources.displayMetrics)
+    try {
+        @Suppress("DEPRECATION")
+        resources.updateConfiguration(configuration, resources.displayMetrics)
+    } catch (error: RuntimeException) {
+        // Best effort only. Not every platform lets an application context re-localize its
+        // resources, and this must never take the app down: the strings that matter are read
+        // through a context localized on demand, and the activities are recreated anyway.
+        Log.w(TAG, "Could not re-localize the resources of this context.", error)
+    }
 }
+
+private const val TAG = "ContextExtensions"
 
 @Suppress("DEPRECATION")
 private fun systemLocale(): Locale =
