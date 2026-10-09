@@ -15,20 +15,20 @@
       },
       "oauth_client": [
         {
-          "client_id": "000000000000-00000000000000000000000000000000.apps.googleusercontent.com",
+          "client_id": "PLACEHOLDER-NOT-A-REAL-WEB-CLIENT-ID",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyA00000000000000000000000000000000"
+          "current_key": "PLACEHOLDER-NOT-A-REAL-GOOGLE-API-KEY"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "000000000000-00000000000000000000000000000000.apps.googleusercontent.com",
+              "client_id": "PLACEHOLDER-NOT-A-REAL-WEB-CLIENT-ID",
               "client_type": 3
             }
           ]
@@ -44,20 +44,20 @@
       },
       "oauth_client": [
         {
-          "client_id": "000000000000-00000000000000000000000000000000.apps.googleusercontent.com",
+          "client_id": "PLACEHOLDER-NOT-A-REAL-WEB-CLIENT-ID",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyA00000000000000000000000000000000"
+          "current_key": "PLACEHOLDER-NOT-A-REAL-GOOGLE-API-KEY"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "000000000000-00000000000000000000000000000000.apps.googleusercontent.com",
+              "client_id": "PLACEHOLDER-NOT-A-REAL-WEB-CLIENT-ID",
               "client_type": 3
             }
           ]

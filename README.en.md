@@ -86,6 +86,8 @@ Producing the Base64 on Windows PowerShell:
 
 The placeholder only exists so that the project compiles and the app can run in local-only mode
 (Room database). APKs built with it cannot use "Continue with Google" sign-in or cloud sync.
+Its API key and client id are deliberately obvious dummies (`PLACEHOLDER-NOT-A-REAL-...`) and contain
+no real credentials, so GitHub secret scanning neither reports nor should report them.
 
 To enable cloud sync, create a project in the [Firebase console](https://console.firebase.google.com/),
 register the Android app `com.minecraftmc22.expenses` (the debug build is `com.minecraftmc22.expenses.dev`),

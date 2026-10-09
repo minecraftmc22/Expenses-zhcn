@@ -85,6 +85,8 @@
 
 占位配置只是让项目能编译通过、应用能以纯本地模式（Room 数据库）运行；
 用它打出的 APK 里，「使用 Google 账号继续」登录和云端同步不可用。
+里面的 API key 和 client id 都是**明显的假值**（`PLACEHOLDER-NOT-A-REAL-...`），不含任何真实凭据，
+所以 GitHub 的密钥扫描不会（也不应该）对它报警。
 
 要启用云同步：到 [Firebase 控制台](https://console.firebase.google.com/) 新建项目，
 添加包名为 `com.minecraftmc22.expenses` 的 Android 应用（调试版包名是 `com.minecraftmc22.expenses.dev`），
