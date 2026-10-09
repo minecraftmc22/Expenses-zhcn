@@ -1,0 +1,96 @@
+name: Android Build
+
+on:
+  push:
+    branches: [master, main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build APKs
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # The Android SDK command line tools need a modern JDK, while this
+      # 2019-era Gradle/AGP toolchain has to run on JDK 8. Install the SDK
+      # packages first with JDK 17, then switch JAVA_HOME to JDK 8.
+      - name: Set up JDK 17 for the Android SDK tools
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK packages
+        run: |
+          yes | sdkmanager --licenses > /dev/null 2>&1 || true
+          sdkmanager "platforms;android-29" "build-tools;29.0.2" "build-tools;28.0.3"
+
+      - name: Set up JDK 8 for Gradle
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '8'
+          cache: gradle
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Provide google-services.json
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: |
+          if [ -n "$GOOGLE_SERVICES_JSON" ]; then
+            printf '%s' "$GOOGLE_SERVICES_JSON" > app/google-services.json
+            echo "Using google-services.json from the GOOGLE_SERVICES_JSON secret."
+          else
+            cp app/google-services.json.ci app/google-services.json
+            echo "GOOGLE_SERVICES_JSON is not set - using the bundled placeholder config."
+          fi
+
+      - name: Build release and debug APKs
+        env:
+          RELEASE_KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+          RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+        run: |
+          if [ -n "$RELEASE_KEYSTORE_BASE64" ]; then
+            echo "Signing the release APK with the keystore from secrets."
+            printf '%s' "$RELEASE_KEYSTORE_BASE64" | base64 -d > "$GITHUB_WORKSPACE/release.jks"
+            ./gradlew --no-daemon assembleProdDebug assembleProdRelease \
+              -PEXPENSES_STORE_FILE="$GITHUB_WORKSPACE/release.jks" \
+              -PEXPENSES_STORE_PASSWORD="$RELEASE_STORE_PASSWORD" \
+              -PEXPENSES_KEY_ALIAS="$RELEASE_KEY_ALIAS" \
+              -PEXPENSES_KEY_PASSWORD="$RELEASE_KEY_PASSWORD"
+          else
+            echo "No keystore secrets found - building an unsigned release APK."
+            ./gradlew --no-daemon assembleProdDebug assembleProdRelease
+          fi
+
+      - name: Show produced APKs
+        run: find app/build/outputs/apk -name '*.apk' -print
+
+      - name: Upload APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: expenses-apks
+          path: app/build/outputs/apk/**/*.apk
+          if-no-files-found: error
+
+      - name: Attach APKs to the release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: app/build/outputs/apk/**/*.apk
+          generate_release_notes: true

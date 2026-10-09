@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/fragment_onboarding"
-        android:name="com.nominalista.expenses.onboarding.OnboardingFragment"
+        android:name="com.minecraftmc22.expenses.onboarding.OnboardingFragment"
         android:label="OnboardingFragment" />
 
 </navigation>

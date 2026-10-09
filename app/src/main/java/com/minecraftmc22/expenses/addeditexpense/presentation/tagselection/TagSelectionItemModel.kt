@@ -1,0 +1,3 @@
+package com.minecraftmc22.expenses.addeditexpense.presentation.tagselection
+
+interface TagSelectionItemModel

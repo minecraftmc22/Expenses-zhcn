@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/fragment_home"
-        android:name="com.nominalista.expenses.home.presentation.HomeFragment"
+        android:name="com.minecraftmc22.expenses.home.presentation.HomeFragment"
         android:label="HomeFragment" />
 
 </navigation>

@@ -9,9 +9,9 @@ android {
     compileSdkVersion 29
 
     defaultConfig {
-        applicationId "com.nominalista.expenses"
-        versionCode 20
-        versionName "0.4.5"
+        applicationId "com.minecraftmc22.expenses"
+        versionCode 3
+        versionName "0.3"
         minSdkVersion 21
         targetSdkVersion 29
 
@@ -40,13 +40,23 @@ android {
         androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
     }
 
+    // Release signing is optional. Put these properties in
+    // ~/.gradle/gradle.properties or pass them with -P on the command line.
+    // When they are missing the release APK is built unsigned instead of
+    // failing the whole build, which is what CI relies on.
+    def hasReleaseSigning = project.hasProperty("EXPENSES_STORE_FILE") &&
+            project.hasProperty("EXPENSES_STORE_PASSWORD") &&
+            project.hasProperty("EXPENSES_KEY_ALIAS") &&
+            project.hasProperty("EXPENSES_KEY_PASSWORD")
+
     signingConfigs {
-        release {
-            // These properties can be placed in ~/.gradle/gradle.properties.
-            storeFile file(EXPENSES_STORE_FILE)
-            storePassword EXPENSES_STORE_PASSWORD
-            keyAlias EXPENSES_KEY_ALIAS
-            keyPassword EXPENSES_KEY_PASSWORD
+        if (hasReleaseSigning) {
+            release {
+                storeFile file(project.property("EXPENSES_STORE_FILE").toString())
+                storePassword project.property("EXPENSES_STORE_PASSWORD").toString()
+                keyAlias project.property("EXPENSES_KEY_ALIAS").toString()
+                keyPassword project.property("EXPENSES_KEY_PASSWORD").toString()
+            }
         }
     }
 
@@ -57,7 +67,9 @@ android {
 
         release {
             minifyEnabled false
-            signingConfig signingConfigs.release
+            if (hasReleaseSigning) {
+                signingConfig signingConfigs.release
+            }
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -68,8 +80,8 @@ android {
         dev {
             versionNameSuffix "-dev"
             applicationIdSuffix ".dev"
-            // Use only English resources to build faster.
-            resConfigs "en", "xxhdpi"
+            // Use only a few resource configurations to build faster.
+            resConfigs "en", "zh", "xxhdpi"
         }
 
         prod {}

@@ -78,7 +78,7 @@
     <string name="today">Today</string>
     <string name="translate_app">Translate the app</string>
     <string name="translate_app_summary">Let\'s make the app available for everyone.</string>
-    <string name="translation_description">If you\'re interested in helping with translating the app to your language, please contact me. I\'d love to support as many as possible!\n\n\Currently supported: 🇺🇸 🇦🇺 🇪🇸 🇵🇱</string>
+    <string name="translation_description">If you\'re interested in helping with translating the app to your language, please contact me. I\'d love to support as many as possible!\n\nCurrently supported: 🇺🇸 🇦🇺 🇪🇸 🇵🇱 🇨🇳</string>
     <string name="welcome_to_expenses">Welcome to Expenses</string>
     <string name="yes">Yes</string>
 </resources>

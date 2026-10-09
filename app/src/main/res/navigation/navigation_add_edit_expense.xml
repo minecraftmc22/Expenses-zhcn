@@ -7,12 +7,12 @@
 
     <fragment
         android:id="@+id/fragment_add_edit_expense"
-        android:name="com.nominalista.expenses.addeditexpense.presentation.AddEditExpenseFragment"
+        android:name="com.minecraftmc22.expenses.addeditexpense.presentation.AddEditExpenseFragment"
         android:label="AddEditExpenseFragment">
 
         <argument
             android:name="expense"
-            app:argType="com.nominalista.expenses.data.model.Expense"
+            app:argType="com.minecraftmc22.expenses.data.model.Expense"
             app:nullable="true" />
 
         <action
@@ -23,7 +23,7 @@
 
     <fragment
         android:id="@+id/fragment_tag_selection"
-        android:name="com.nominalista.expenses.addeditexpense.presentation.tagselection.TagSelectionFragment"
+        android:name="com.minecraftmc22.expenses.addeditexpense.presentation.tagselection.TagSelectionFragment"
         android:label="TagSelectionFragment" />
 
 </navigation>

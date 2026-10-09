@@ -6,12 +6,12 @@
 
     <fragment
         android:id="@+id/fragment_expense_detail"
-        android:name="com.nominalista.expenses.expensedetail.presentation.ExpenseDetailFragment"
+        android:name="com.minecraftmc22.expenses.expensedetail.presentation.ExpenseDetailFragment"
         android:label="ExpenseDetailFragment">
 
         <argument
             android:name="expense"
-            app:argType="com.nominalista.expenses.data.model.Expense" />
+            app:argType="com.minecraftmc22.expenses.data.model.Expense" />
 
     </fragment>
 

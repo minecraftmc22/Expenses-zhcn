@@ -5,7 +5,7 @@
 
     <fragment
         android:id="@+id/fragment_currency_selection"
-        android:name="com.nominalista.expenses.currencyselection.CurrencySelectionFragment"
+        android:name="com.minecraftmc22.expenses.currencyselection.CurrencySelectionFragment"
         android:label="CurrencySelectionFragment" />
 
 </navigation>
