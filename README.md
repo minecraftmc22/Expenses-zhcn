@@ -70,11 +70,33 @@
 | `RELEASE_KEY_ALIAS` | 密钥别名 |
 | `RELEASE_KEY_PASSWORD` | 密钥密码 |
 
-生成 Base64（Windows PowerShell）：
+**还没有 keystore？** 先创建一把（`keytool` 在 JRE 里自带，Windows 上通常不在 PATH）：
 
 ```powershell
-[Convert]::ToBase64String([IO.File]::ReadAllBytes("release.jks")) | Set-Content keystore.txt
+& "C:\Program Files\Java\jre1.8.0_421\bin\keytool.exe" -genkeypair -v `
+  -keystore "$env:USERPROFILE\expenses-release.jks" `
+  -alias expenses -keyalg RSA -keysize 2048 -validity 10000 -storetype JKS
 ```
+
+它会依次问 keystore 密码、密钥密码（可直接回车沿用同一个）和 CN/OU/O/L/ST/C（随便填，只影响证书显示名）。
+
+生成 Base64 并复制到剪贴板：
+
+```powershell
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("$env:USERPROFILE\expenses-release.jks")) `
+  | Set-Content "$env:USERPROFILE\keystore.txt"
+Get-Content "$env:USERPROFILE\keystore.txt" | Set-Clipboard
+```
+
+四个 Secret 都要加，而且必须加在 **Settings → Secrets and variables → Actions → `Secrets` 标签页**
+（不是 `Variables`；也不要建成 Environment secret —— 那需要在 workflow 里声明 `environment:` 才读得到，本项目没有声明）。
+
+> ⚠️ **务必备份这把 `.jks` 和两个密码。** 丢了就再也无法用同一签名更新应用，用户只能卸载重装。
+> `.jks`、`.keystore`、`keystore.txt` 都已写进 `.gitignore`，不要 `git add -f` 强行提交。
+>
+> **产物是未签名时怎么查**：日志里会打印 `Signing secrets are incomplete, missing: ...` 并列出缺哪个
+> Secret，产物文件名会是 `app-prod-release-unsigned.apk`。补齐后重新运行一次即可（Secret 在运行时读取，
+> 重新运行就生效）。如果只配了 `RELEASE_KEYSTORE_BASE64` 而漏了另外三个，构建结束时会直接报错提醒。
 
 ### 配置 Firebase（可选）
 

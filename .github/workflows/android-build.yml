@@ -74,7 +74,18 @@ jobs:
           RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
           RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
         run: |
-          if [ -n "$RELEASE_KEYSTORE_BASE64" ]; then
+          MISSING=""
+          if [ -z "$RELEASE_KEYSTORE_BASE64" ]; then MISSING="$MISSING RELEASE_KEYSTORE_BASE64"; fi
+          if [ -z "$RELEASE_STORE_PASSWORD" ]; then MISSING="$MISSING RELEASE_STORE_PASSWORD"; fi
+          if [ -z "$RELEASE_KEY_ALIAS" ]; then MISSING="$MISSING RELEASE_KEY_ALIAS"; fi
+          if [ -z "$RELEASE_KEY_PASSWORD" ]; then MISSING="$MISSING RELEASE_KEY_PASSWORD"; fi
+
+          if [ -n "$MISSING" ]; then
+            echo "::warning::Signing secrets are incomplete, missing:$MISSING"
+            echo "The release APK will be UNSIGNED and cannot be installed. Add the missing"
+            echo "secrets under Settings -> Secrets and variables -> Actions -> Secrets."
+            ./gradlew --no-daemon assembleProdDebug assembleProdRelease
+          else
             echo "Signing the release APK with the keystore from secrets."
             printf '%s' "$RELEASE_KEYSTORE_BASE64" | base64 -d > "$GITHUB_WORKSPACE/release.jks"
             ./gradlew --no-daemon assembleProdDebug assembleProdRelease \
@@ -82,13 +93,20 @@ jobs:
               -PEXPENSES_STORE_PASSWORD="$RELEASE_STORE_PASSWORD" \
               -PEXPENSES_KEY_ALIAS="$RELEASE_KEY_ALIAS" \
               -PEXPENSES_KEY_PASSWORD="$RELEASE_KEY_PASSWORD"
-          else
-            echo "No keystore secrets found - building an unsigned release APK."
-            ./gradlew --no-daemon assembleProdDebug assembleProdRelease
           fi
 
-      - name: Show produced APKs
-        run: find app/build/outputs/apk -name '*.apk' -print
+      - name: Check produced APKs
+        env:
+          RELEASE_KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+        run: |
+          find app/build/outputs/apk -name '*.apk' -print
+          if [ -n "$RELEASE_KEYSTORE_BASE64" ] \
+             && [ -n "$(find app/build/outputs/apk -name '*-unsigned.apk' -print -quit)" ]; then
+            echo "::error::An unsigned APK was produced even though RELEASE_KEYSTORE_BASE64 is set."
+            echo "Check that all four signing secrets are non-empty and that RELEASE_KEYSTORE_BASE64"
+            echo "really is the Base64 of a .jks file."
+            exit 1
+          fi
 
       - name: Upload APKs
         uses: actions/upload-artifact@v4

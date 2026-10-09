@@ -71,11 +71,39 @@ Add these in **Settings → Secrets and variables → Actions**:
 | `RELEASE_KEY_ALIAS` | key alias |
 | `RELEASE_KEY_PASSWORD` | key password |
 
-Producing the Base64 on Windows PowerShell:
+**No keystore yet?** Create one first (`keytool` ships with the JRE and is usually not on PATH on Windows):
 
 ```powershell
-[Convert]::ToBase64String([IO.File]::ReadAllBytes("release.jks")) | Set-Content keystore.txt
+& "C:\Program Files\Java\jre1.8.0_421\bin\keytool.exe" -genkeypair -v `
+  -keystore "$env:USERPROFILE\expenses-release.jks" `
+  -alias expenses -keyalg RSA -keysize 2048 -validity 10000 -storetype JKS
 ```
+
+It asks for the keystore password, the key password (press Enter to reuse the same one) and the
+CN/OU/O/L/ST/C fields (anything works, they only show up in the certificate name).
+
+Produce the Base64 and copy it to the clipboard:
+
+```powershell
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("$env:USERPROFILE\expenses-release.jks")) `
+  | Set-Content "$env:USERPROFILE\keystore.txt"
+Get-Content "$env:USERPROFILE\keystore.txt" | Set-Clipboard
+```
+
+All four secrets are required, and they must go under
+**Settings → Secrets and variables → Actions → the `Secrets` tab** (not `Variables`; do not create them as
+environment secrets either — those need an `environment:` declaration in the workflow, which this project
+does not use).
+
+> ⚠️ **Back up the `.jks` file and both passwords.** If they are lost you can never update the app with the
+> same signature again and users have to uninstall and reinstall. `.jks`, `.keystore` and `keystore.txt`
+> are all in `.gitignore`; never force-add them.
+>
+> **Why an APK can come out unsigned**: the log prints `Signing secrets are incomplete, missing: ...` and
+> names the missing secret, and the artifact is called `app-prod-release-unsigned.apk`. Add the secrets and
+> re-run — they are read at run time, so a new run picks them up. If only `RELEASE_KEYSTORE_BASE64` is set
+> while the other three are missing, the build fails at the end with a clear error instead of silently
+> producing an unsigned APK.
 
 ### Firebase configuration (optional)
 
