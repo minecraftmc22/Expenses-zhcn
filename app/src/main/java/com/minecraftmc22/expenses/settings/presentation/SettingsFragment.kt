@@ -1,10 +1,12 @@
 package com.minecraftmc22.expenses.settings.presentation
 
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -154,13 +156,25 @@ class SettingsFragment : Fragment() {
     }
 
     /**
-     * A new language only takes effect once the activities are created again,
-     * so the whole task is restarted on top of the splash activity.
+     * Starts the app over on the splash screen, so every activity is created again and picks up
+     * the new theme colour or language. Both are applied when an activity is created, which is
+     * why this is the step that makes them visible.
+     *
+     * The intent is started directly instead of through startActivitySafely: that helper asks the
+     * package manager whether the intent resolves and then silently skips the start when it does
+     * not, which makes a change look like nothing happened at all.
      */
     private fun restartApplication() {
         val intent = Intent(requireContext(), SplashActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-        requireActivity().startActivitySafely(intent)
+
+        try {
+            Log.d(TAG, "Restarting the app to apply the change.")
+            startActivity(intent)
+        } catch (error: ActivityNotFoundException) {
+            Log.w(TAG, "Could not restart, recreating this screen instead.", error)
+            requireActivity().recreate()
+        }
     }
 
     private fun navigateToBackground() {
@@ -278,6 +292,8 @@ class SettingsFragment : Fragment() {
     }
 
     companion object {
+
+        private const val TAG = "SettingsFragment"
 
         private const val REQUEST_CODE_SELECT_DEFAULT_CURRENCY = 1
         private const val REQUEST_CODE_EXPORT_BACKUP = 2
