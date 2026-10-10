@@ -1,7 +1,9 @@
 package com.minecraftmc22.expenses.settings.presentation
 
 import android.app.Dialog
+import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.SeekBar
 import android.widget.TextView
@@ -33,8 +35,15 @@ class CustomColorDialogFragment : DialogFragment() {
     private lateinit var greenBar: SeekBar
     private lateinit var blueBar: SeekBar
 
+    /** Language aware context for the texts, resolved once when the dialog is built. */
+    private lateinit var localizedContext: Context
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val localized = requireContext().withSelectedLanguage()
+        Log.d(TAG, "Building the colour mixer.")
+
+        // Resolved once: doing it per slider frame would create a context on every drag step.
+        localizedContext = requireContext().withSelectedLanguage()
+
         val view = layoutInflater.inflate(R.layout.dialog_custom_color, null)
 
         bindWidgets(view)
@@ -52,16 +61,31 @@ class CustomColorDialogFragment : DialogFragment() {
         greenBar.setOnSeekBarChangeListener(listener)
         blueBar.setOnSeekBarChangeListener(listener)
 
-        updatePreview(localized)
+        updatePreview()
 
         return MaterialAlertDialogBuilder(requireActivity())
-            .setTitle(localized.getString(R.string.custom_color_title))
+            .setTitle(localizedContext.getString(R.string.custom_color_title))
             .setView(view)
-            .setPositiveButton(localized.getString(R.string.ok)) { _, _ ->
-                onColorMixed?.invoke(mixedColor())
+            .setPositiveButton(localizedContext.getString(R.string.ok)) { _, _ ->
+                val color = mixedColor()
+
+                // Closed before the change is applied: applying restarts the app, and the
+                // automatic dismissal that follows would then be refused after the state was
+                // saved, which takes the app down.
+                closeSafely()
+
+                onColorMixed?.invoke(color)
             }
-            .setNegativeButton(localized.getString(R.string.cancel)) { _, _ -> }
+            .setNegativeButton(localizedContext.getString(R.string.cancel)) { _, _ -> }
             .create()
+    }
+
+    private fun closeSafely() {
+        try {
+            dismiss()
+        } catch (error: IllegalStateException) {
+            Log.w(TAG, "The mixer was already going away.", error)
+        }
     }
 
     private fun bindWidgets(view: View) {
@@ -76,21 +100,21 @@ class CustomColorDialogFragment : DialogFragment() {
 
     private fun mixedColor() = colorOf(redBar.progress, greenBar.progress, blueBar.progress)
 
-    private fun updatePreview(localized: android.content.Context) {
+    private fun updatePreview() {
         preview.setBackgroundColor(mixedColor())
 
-        redChannel.text = channelLabel(localized, R.string.color_red, redBar.progress)
-        greenChannel.text = channelLabel(localized, R.string.color_green, greenBar.progress)
-        blueChannel.text = channelLabel(localized, R.string.color_blue, blueBar.progress)
+        redChannel.text = channelLabel(R.string.color_red, redBar.progress)
+        greenChannel.text = channelLabel(R.string.color_green, greenBar.progress)
+        blueChannel.text = channelLabel(R.string.color_blue, blueBar.progress)
     }
 
-    private fun channelLabel(localized: android.content.Context, labelResId: Int, value: Int) =
-        "${localized.getString(labelResId)}  $value"
+    private fun channelLabel(labelResId: Int, value: Int) =
+        "${localizedContext.getString(labelResId)}  $value"
 
     private inner class ChannelListener : SeekBar.OnSeekBarChangeListener {
 
         override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-            updatePreview(requireContext().withSelectedLanguage())
+            updatePreview()
         }
 
         override fun onStartTrackingTouch(seekBar: SeekBar?) = Unit

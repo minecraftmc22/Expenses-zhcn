@@ -61,16 +61,19 @@ class ThemeColorSelectionDialogFragment : DialogFragment(), DialogInterface.OnCl
     }
 
     /**
-     * A tap applies the colour straight away and closes the picker. There is nothing else to
-     * confirm, and waiting for a button made a tap look like it did nothing at all.
+     * A tap applies the colour straight away. There is nothing else to confirm, and waiting for a
+     * button made a tap look like it did nothing at all.
      */
     override fun onClick(dialog: DialogInterface, which: Int) {
         val themeColor = themeColors[which]
 
         Log.d(TAG, "Theme colour picked: ${themeColor.name}")
 
+        // Closed before anything is applied: applying restarts the app, and closing performs a
+        // fragment transaction that would be refused once the instance state has been saved.
+        closeSafely()
+
         if (themeColor == ThemeColor.CUSTOM) {
-            dismiss()
             onCustomColorRequested?.invoke()
             return
         }
@@ -78,8 +81,14 @@ class ThemeColorSelectionDialogFragment : DialogFragment(), DialogInterface.OnCl
         selectedThemeColor = themeColor
 
         onThemeColorSelected?.invoke(themeColor)
+    }
 
-        dismiss()
+    private fun closeSafely() {
+        try {
+            dismiss()
+        } catch (error: IllegalStateException) {
+            Log.w(TAG, "The picker was already going away.", error)
+        }
     }
 
     private inner class ThemeColorAdapter(private val context: Context) : BaseAdapter() {

@@ -144,9 +144,13 @@ class SettingsFragment : Fragment() {
     }
 
     private fun showCustomColorDialog() {
+        Log.d(TAG, "Showing the colour mixer.")
+
         val dialogFragment = CustomColorDialogFragment.newInstance(model.customThemeColor())
         dialogFragment.onColorMixed = { model.customThemeColorSelected(it) }
         dialogFragment.show(requireFragmentManager(), CustomColorDialogFragment.TAG)
+
+        Log.d(TAG, "The colour mixer was asked to show.")
     }
 
     private fun showLanguageSelectionDialog(currentLanguage: Language) {
