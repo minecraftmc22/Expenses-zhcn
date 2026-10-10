@@ -44,6 +44,9 @@
         <activity android:name=".settings.presentation.BackgroundActivity"
             android:screenOrientation="portrait"/>
 
+        <activity android:name=".settings.presentation.CustomColorActivity"
+            android:screenOrientation="portrait"/>
+
         <activity android:name=".about.AboutActivity"
             android:screenOrientation="portrait"/>
 
