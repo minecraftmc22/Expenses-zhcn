@@ -1,12 +1,14 @@
 package com.minecraftmc22.expenses.settings.presentation
 
 import android.app.Dialog
+import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.minecraftmc22.expenses.R
 import com.minecraftmc22.expenses.common.presentation.Theme
+import com.minecraftmc22.expenses.util.extensions.withSelectedLanguage
 
 class ThemeSelectionDialogFragment : DialogFragment(), DialogInterface.OnClickListener {
 
@@ -26,22 +28,27 @@ class ThemeSelectionDialogFragment : DialogFragment(), DialogInterface.OnClickLi
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        // Same split as the language dialog: the dialog itself is built on the activity context,
+        // because that is the one carrying the Material theme, while the texts come from the
+        // language aware context, so they cannot fall back to a stale locale.
+        val localized = requireContext().withSelectedLanguage()
+
         return MaterialAlertDialogBuilder(requireActivity())
-            .setTitle(R.string.select_theme)
-            .setSingleChoiceItems(getItems(), getCheckedItem(), this)
-            .setPositiveButton(R.string.ok) { _, _ ->
+            .setTitle(localized.getString(R.string.select_theme))
+            .setSingleChoiceItems(getItems(localized), getCheckedItem(), this)
+            .setPositiveButton(localized.getString(R.string.ok)) { _, _ ->
                 selectedTheme?.let { onThemeSelected?.invoke(it) }
             }
-            .setNegativeButton(R.string.cancel) { _, _ -> }
+            .setNegativeButton(localized.getString(R.string.cancel)) { _, _ -> }
             .create()
     }
 
-    private fun getItems(): Array<String> {
+    private fun getItems(context: Context): Array<String> {
         return themes.map { theme ->
             when (theme) {
-                Theme.LIGHT -> requireContext().getString(R.string.light)
-                Theme.DARK -> requireContext().getString(R.string.dark)
-                Theme.SYSTEM_DEFAULT -> requireContext().getString(R.string.system_default)
+                Theme.LIGHT -> context.getString(R.string.light)
+                Theme.DARK -> context.getString(R.string.dark)
+                Theme.SYSTEM_DEFAULT -> context.getString(R.string.system_default)
             }
         }.toTypedArray()
     }

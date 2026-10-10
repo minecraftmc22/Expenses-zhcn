@@ -71,7 +71,11 @@ class ThemeColorSelectionDialogFragment : DialogFragment(), DialogInterface.OnCl
         override fun getItemId(position: Int) = position.toLong()
 
         override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-            val view = convertView ?: LayoutInflater.from(context)
+            // Rows are inflated with the context of the list they end up in — the one created by
+            // the Material dialog, which carries the theme. The language aware context handed to
+            // this adapter is a theme-less wrapper, and inflating with it makes every `?attr/...`
+            // lookup of item_theme_color fail, which takes the dialog down before it can show.
+            val view = convertView ?: LayoutInflater.from(parent.context)
                 .inflate(R.layout.item_theme_color, parent, false)
 
             val themeColor = themeColors[position]
