@@ -358,12 +358,30 @@ class SettingsFragmentModel(
     }
 
     fun themeColorSelected(themeColor: ThemeColor) {
+        Log.d(TAG, "Theme colour selected: ${themeColor.name}")
+
         preferenceDataSource.setThemeColor(getApplication(), themeColor)
 
         loadItemModels()
 
         // Every activity overlays its theme at the start of onCreate, so they all have to be
         // created again for the accent to reach the action bars and the inflated views.
+        restartApplication.next()
+    }
+
+    /** Colour mixed by the user, zero while nothing has been mixed yet. */
+    fun customThemeColor() = preferenceDataSource.getCustomThemeColor(getApplication())
+
+    fun customThemeColorSelected(color: Int) {
+        val application = getApplication<Application>()
+
+        Log.d(TAG, "Custom theme colour selected.")
+
+        preferenceDataSource.setCustomThemeColor(application, color)
+        preferenceDataSource.setThemeColor(application, ThemeColor.CUSTOM)
+
+        loadItemModels()
+
         restartApplication.next()
     }
 

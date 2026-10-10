@@ -87,6 +87,11 @@
     <string name="theme_color_orange">Naranja</string>
     <string name="theme_color_purple">Morado</string>
     <string name="theme_color_pink">Rosa</string>
+    <string name="theme_color_custom">Color personalizado…</string>
+    <string name="custom_color_title">Mezcla un color</string>
+    <string name="color_red">Rojo</string>
+    <string name="color_green">Verde</string>
+    <string name="color_blue">Azul</string>
     <string name="language">Idioma</string>
     <string name="select_language">Seleccionar idioma</string>
     <string name="light">Claro</string>

@@ -148,6 +148,19 @@ class PreferenceDataSource {
         preferences.edit().putString(getThemeColorKey(context), themeColor.name).apply()
     }
 
+    /** Colour mixed by the user; zero means "not mixed yet", so the theme colour is kept. */
+    fun getCustomThemeColor(context: Context): Int =
+        PreferenceManager.getDefaultSharedPreferences(context)
+            .getInt(getCustomThemeColorKey(context), 0)
+
+    fun setCustomThemeColor(context: Context, color: Int) {
+        PreferenceManager.getDefaultSharedPreferences(context)
+            .edit().putInt(getCustomThemeColorKey(context), color).apply()
+    }
+
+    private fun getCustomThemeColorKey(context: Context) =
+        context.getString(R.string.key_custom_theme_color)
+
     // WebDAV
 
     fun getWebDavUrl(context: Context): String =

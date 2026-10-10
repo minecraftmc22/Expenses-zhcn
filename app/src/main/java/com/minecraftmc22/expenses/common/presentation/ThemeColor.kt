@@ -49,6 +49,17 @@ enum class ThemeColor(
         R.string.theme_color_pink,
         R.color.theme_color_pink,
         R.style.ThemeOverlay_Expenses_ThemeColor_Pink
+    ),
+
+    /**
+     * Any colour the user mixes themselves. It has no overlay of its own — a theme overlay has to
+     * exist as a resource, so an arbitrary colour cannot become one. The default overlay is
+     * applied instead and the views are repainted with the stored colour afterwards.
+     */
+    CUSTOM(
+        R.string.theme_color_custom,
+        R.color.expenses_blue,
+        R.style.ThemeOverlay_Expenses_ThemeColor_Default
     );
 
     fun toDisplayName(context: Context): String = context.getString(labelResId)

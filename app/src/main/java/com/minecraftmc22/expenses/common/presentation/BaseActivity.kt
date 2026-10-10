@@ -18,6 +18,8 @@ import com.minecraftmc22.expenses.R
 import com.minecraftmc22.expenses.util.BackgroundRenderer
 import com.minecraftmc22.expenses.util.extensions.applyThemeColor
 import com.minecraftmc22.expenses.util.extensions.withSelectedLanguage
+import com.minecraftmc22.expenses.util.resolvePrimaryColor
+import com.minecraftmc22.expenses.util.tintThemeColor
 
 @SuppressLint("Registered")
 open class BaseActivity : AppCompatActivity() {
@@ -118,6 +120,19 @@ open class BaseActivity : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
         overridePendingEnterTransition()
+    }
+
+    /**
+     * A mixed colour cannot be a theme overlay, so the views are repainted by hand once the
+     * content exists and before it is drawn for the first time.
+     */
+    override fun onContentChanged() {
+        super.onContentChanged()
+
+        val primary = resolvePrimaryColor()
+        val custom = app.preferenceDataSource.getCustomThemeColor(this)
+
+        window.decorView.tintThemeColor(if (custom == 0) primary else custom, primary)
     }
 
     private fun overridePendingEnterTransition() {

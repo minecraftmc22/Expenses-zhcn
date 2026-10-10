@@ -5,14 +5,15 @@ import android.content.Context
 import android.content.DialogInterface
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.minecraftmc22.expenses.Application
 import com.minecraftmc22.expenses.R
 import com.minecraftmc22.expenses.common.presentation.ThemeColor
 import com.minecraftmc22.expenses.util.extensions.withSelectedLanguage
@@ -24,6 +25,9 @@ import com.minecraftmc22.expenses.util.extensions.withSelectedLanguage
 class ThemeColorSelectionDialogFragment : DialogFragment(), DialogInterface.OnClickListener {
 
     var onThemeColorSelected: ((ThemeColor) -> Unit)? = null
+
+    /** Raised when the user wants to mix a colour instead of taking one of the presets. */
+    var onCustomColorRequested: (() -> Unit)? = null
 
     private val themeColors by lazy { ThemeColor.values() }
 
@@ -47,19 +51,35 @@ class ThemeColorSelectionDialogFragment : DialogFragment(), DialogInterface.OnCl
 
         return MaterialAlertDialogBuilder(requireActivity())
             .setTitle(localized.getString(R.string.select_theme_color))
-            .setAdapter(ThemeColorAdapter(localized), this)
-            .setPositiveButton(localized.getString(R.string.ok)) { _, _ ->
-                selectedThemeColor?.let { onThemeColorSelected?.invoke(it) }
-            }
+            .setSingleChoiceItems(
+                ThemeColorAdapter(localized),
+                themeColors.indexOf(currentThemeColor),
+                this
+            )
             .setNegativeButton(localized.getString(R.string.cancel)) { _, _ -> }
             .create()
     }
 
+    /**
+     * A tap applies the colour straight away and closes the picker. There is nothing else to
+     * confirm, and waiting for a button made a tap look like it did nothing at all.
+     */
     override fun onClick(dialog: DialogInterface, which: Int) {
-        selectedThemeColor = themeColors[which]
+        val themeColor = themeColors[which]
 
-        // Redraw the rows so the tick follows the tap.
-        (dialog as? AlertDialog)?.listView?.invalidateViews()
+        Log.d(TAG, "Theme colour picked: ${themeColor.name}")
+
+        if (themeColor == ThemeColor.CUSTOM) {
+            dismiss()
+            onCustomColorRequested?.invoke()
+            return
+        }
+
+        selectedThemeColor = themeColor
+
+        onThemeColorSelected?.invoke(themeColor)
+
+        dismiss()
     }
 
     private inner class ThemeColorAdapter(private val context: Context) : BaseAdapter() {
@@ -82,7 +102,7 @@ class ThemeColorSelectionDialogFragment : DialogFragment(), DialogInterface.OnCl
 
             view.findViewById<View>(R.id.colorSwatch).background = GradientDrawable().apply {
                 shape = GradientDrawable.OVAL
-                setColor(themeColor.toColor(context))
+                setColor(swatchColorOf(themeColor, context))
             }
 
             view.findViewById<TextView>(R.id.colorName).text = themeColor.toDisplayName(context)
@@ -91,6 +111,17 @@ class ThemeColorSelectionDialogFragment : DialogFragment(), DialogInterface.OnCl
                 if (themeColor == selectedThemeColor) View.VISIBLE else View.INVISIBLE
 
             return view
+        }
+
+        /** The mixed colour lives in the preferences, so the row shows what was mixed. */
+        private fun swatchColorOf(themeColor: ThemeColor, context: Context): Int {
+            if (themeColor != ThemeColor.CUSTOM) return themeColor.toColor(context)
+
+            val stored = (context.applicationContext as Application)
+                .preferenceDataSource
+                .getCustomThemeColor(context)
+
+            return if (stored != 0) stored else themeColor.toColor(context)
         }
     }
 

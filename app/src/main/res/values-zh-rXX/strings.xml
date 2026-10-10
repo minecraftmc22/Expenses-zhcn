@@ -88,6 +88,11 @@
     <string name="theme_color_orange">橘子色</string>
     <string name="theme_color_purple">葡萄紫</string>
     <string name="theme_color_pink">樱花粉</string>
+    <string name="theme_color_custom">人家自己调一个…</string>
+    <string name="custom_color_title">想调成什么颜色呀？</string>
+    <string name="color_red">红红</string>
+    <string name="color_green">绿绿</string>
+    <string name="color_blue">蓝蓝</string>
     <string name="language">语言呐</string>
     <string name="select_language">想让人家说哪种话呀？</string>
     <string name="light">亮一点</string>

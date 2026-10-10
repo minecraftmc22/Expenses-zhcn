@@ -87,6 +87,11 @@
     <string name="theme_color_orange">橙色</string>
     <string name="theme_color_purple">紫色</string>
     <string name="theme_color_pink">粉色</string>
+    <string name="theme_color_custom">自訂顏色…</string>
+    <string name="custom_color_title">調一個顏色</string>
+    <string name="color_red">紅</string>
+    <string name="color_green">綠</string>
+    <string name="color_blue">藍</string>
     <string name="language">語言</string>
     <string name="select_language">選擇語言</string>
     <string name="light">淺色</string>

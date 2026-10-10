@@ -87,6 +87,11 @@
     <string name="theme_color_orange">Orange</string>
     <string name="theme_color_purple">Purple</string>
     <string name="theme_color_pink">Pink</string>
+    <string name="theme_color_custom">Custom colour…</string>
+    <string name="custom_color_title">Mix a colour</string>
+    <string name="color_red">Red</string>
+    <string name="color_green">Green</string>
+    <string name="color_blue">Blue</string>
     <string name="language">Language</string>
     <string name="select_language">Select language</string>
     <string name="light">Light</string>
